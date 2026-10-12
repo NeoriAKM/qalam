@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/qalam.dir/link.d CMakeFiles/qalam.dir/src/main.cpp.o -o qalam  /usr/lib/libsfml-graphics.so.3.1.0 /usr/lib/libsfml-window.so.3.1.0 /usr/lib/libsfml-system.so.3.1.0
