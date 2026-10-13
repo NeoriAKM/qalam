@@ -4,10 +4,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
+// #include <fstream>
 
-std::vector<std::string> lines = {
-    "Qalam Text Editor. Live long and prosper!"
-};
+// std::ifstream textfile("etc/text.txt");
+std::vector<std::string> lines;
+std::string placeholder = "Qalam Text Editor. Live long and prosper!";
 
 int buflen(int line) {return (int)lines[line].size();}
 int bufc() {return (int)lines.size();}
@@ -15,13 +16,20 @@ int bufc() {return (int)lines.size();}
 /*-------------------------------------------------------*/
 
 int main() {
+    /*
+    if (!textfile.is_open()) {
+        std::cerr << "WARN: File unaviable to open\n";
+        return 1;
+    }
+    */
 
     sf::RenderWindow window(sf::VideoMode({800, 600}), "Qalam");
     sf::Font font;
-    if (!font.openFromFile("arial.ttf")) {
+    if (!font.openFromFile("etc/font.ttf")) {
         std::cout << "Font not found, Sorry. [return 1]\n";
         return 1;
     }
+    lines.emplace_back(placeholder);
 
     int charsize = 20;
     
@@ -48,20 +56,58 @@ int main() {
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                for (int i=0; i<bufc(); i++) {std::cout << lines[i];}
+                for (int i=0; i<bufc(); i++) {std::cout << lines[i] << '\n';}
                 window.close();
             }
 
+            // ========== Left Right keys ==========
+
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                if (key->code==sf::Keyboard::Key::Left  && cursorX > 0) cursorX--;
-                if (key->code==sf::Keyboard::Key::Right && cursorX < buflen(cursorY)) cursorX++;
+                if (key->code==sf::Keyboard::Key::Left) {
+                    if (cursorX > 0) cursorX--;
+                    else if (cursorY > 0) {
+                        cursorY--;
+                        cursorX = buflen(cursorY);
+                    }
+                }
+                if (key->code==sf::Keyboard::Key::Right) {
+                    if (cursorX < buflen(cursorY))
+                        cursorX++;
+                    else if (cursorY != bufc()-1) {
+                        cursorX=0;
+                        cursorY++;
+                    }
+                }
 
-                if (key->code==sf::Keyboard::Key::Down && cursorY < bufc()-1) cursorY++;
-                if (key->code==sf::Keyboard::Key::Up   && cursorY > 0) cursorY--;
+                // ========== Up-Down keys ==========
 
-                if (key->code == sf::Keyboard::Key::Backspace && cursorX > 0) {
-                    lines[cursorY].erase(cursorX-1, 1);
-                    cursorX--;
+                if (key->code == sf::Keyboard::Key::Down && cursorY < bufc()-1) {
+                    cursorY++;
+                    if (cursorX > buflen(cursorY)) {
+                        cursorX = buflen(cursorY);
+                    }
+                }
+                if (key->code==sf::Keyboard::Key::Up) {
+                    if (cursorY > 0) {
+                        cursorY--;
+                        if (cursorX > buflen(cursorY)) {
+                            cursorX = buflen(cursorY);
+                        }
+                    }
+                }
+                
+                // ========== Delete keys ==========
+
+                if (key->code == sf::Keyboard::Key::Backspace) {
+                    if (cursorX > 0) {
+                        lines[cursorY].erase(cursorX - 1, 1);
+                        cursorX--;
+                    } else if (cursorY > 0) {
+                        lines[cursorY - 1] += lines[cursorY];
+                        lines.erase(lines.begin() + cursorY);
+                        cursorY--;
+                        cursorX = buflen(cursorY - 1);
+                    }
                     text.setString(lines[cursorY]);
                 }
                 if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY)) {
@@ -82,6 +128,7 @@ int main() {
                     lines.insert(lines.begin() + cursorY + 1, rest);
                     cursorY++;
                     cursorX=0;
+                    text.setString(lines[cursorY]);
                 }
             }
 

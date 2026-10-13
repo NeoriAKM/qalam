@@ -197,6 +197,7 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
   /usr/include/c++/16/bits/fs_fwd.h \
   /usr/include/c++/16/bits/fs_ops.h \
   /usr/include/c++/16/bits/fs_path.h \
+  /usr/include/c++/16/bits/fstream.tcc \
   /usr/include/c++/16/bits/functexcept.h \
   /usr/include/c++/16/bits/functional_hash.h \
   /usr/include/c++/16/bits/hash_bytes.h \
@@ -296,6 +297,7 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
   /usr/include/c++/16/ext/string_conversions.h \
   /usr/include/c++/16/ext/type_traits.h \
   /usr/include/c++/16/filesystem \
+  /usr/include/c++/16/fstream \
   /usr/include/c++/16/functional \
   /usr/include/c++/16/initializer_list \
   /usr/include/c++/16/iomanip \
@@ -340,8 +342,10 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
   /usr/include/c++/16/variant \
   /usr/include/c++/16/vector \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/atomic_word.h \
+  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/basic_file.h \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++config.h \
+  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++io.h \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++locale.h \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/cpu_defines.h \
   /usr/include/c++/16/x86_64-pc-linux-gnu/bits/ctype_base.h \
@@ -485,10 +489,6 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 
 /usr/include/linux/stddef.h:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/libatomic_asneeded.so:
-
-/usr/include/linux/errno.h:
-
 /usr/include/gnu/stubs-64.h:
 
 /usr/include/features-time64.h:
@@ -510,6 +510,12 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/ctype_inline.h:
 
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/cpu_defines.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/libatomic_asneeded.so:
+
+/usr/include/linux/errno.h:
+
+/usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++io.h:
 
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h:
 
@@ -599,6 +605,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 
 /usr/include/c++/16/cassert:
 
+/usr/include/c++/16/fstream:
+
 /usr/include/c++/16/bits/version.h:
 
 /usr/include/c++/16/bits/utility.h:
@@ -616,6 +624,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/c++/16/bits/streambuf_iterator.h:
 
 /usr/include/c++/16/bits/streambuf.tcc:
+
+/usr/include/c++/16/bits/stream_iterator.h:
 
 /usr/include/bits/select.h:
 
@@ -814,6 +824,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/c++/16/array:
 
 /usr/include/SFML/Window/Window.hpp:
+
+/usr/include/c++/16/bits/fstream.tcc:
 
 /usr/lib/libxcb.so.1:
 
@@ -1269,6 +1281,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 
 /usr/include/c++/16/bits/stl_iterator.h:
 
+/usr/include/c++/16/x86_64-pc-linux-gnu/bits/basic_file.h:
+
 /usr/include/c++/16/bits/stl_iterator_base_types.h:
 
 /usr/include/bits/locale.h:
@@ -1276,5 +1290,3 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/c++/16/bits/stl_pair.h:
 
 /usr/include/c++/16/bits/stl_uninitialized.h:
-
-/usr/include/c++/16/bits/stream_iterator.h:
