@@ -12,6 +12,8 @@ std::vector<std::string> lines = {
 int buflen(int line) {return (int)lines[line].size();}
 int bufc() {return (int)lines.size();}
 
+/*-------------------------------------------------------*/
+
 int main() {
 
     sf::RenderWindow window(sf::VideoMode({800, 600}), "Qalam");
@@ -28,60 +30,78 @@ int main() {
     
     int cursorY = 0;
     int cursorX = buflen(cursorY);
+    
 
-    std::string& current_line = lines[cursorY];
+    const float line_height = font.getLineSpacing(charsize);
+    const float text_x = 20.f;
+    const float text_y = 20.f;
 
 
-    sf::Text text(font, current_line, charsize);
-    sf::RectangleShape cursor({2.f, 20.f});
+    // std::string& current_line = lines[cursorY];
+
+    sf::Text text(font, lines[cursorY], charsize);
+    sf::RectangleShape cursor({2.f, line_height});
 
     cursor.setFillColor(sf::Color::White);
     text.setPosition({20.f, 0.f});
  
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) window.close();
+            if (event->is<sf::Event::Closed>()) {
+                for (int i=0; i<bufc(); i++) {std::cout << lines[i];}
+                window.close();
+            }
 
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
                 if (key->code==sf::Keyboard::Key::Left  && cursorX > 0) cursorX--;
                 if (key->code==sf::Keyboard::Key::Right && cursorX < buflen(cursorY)) cursorX++;
 
-                if (key->code==sf::Keyboard::Key::Down) cursorX = buflen(cursorY);
-                if (key->code==sf::Keyboard::Key::Up  ) cursorX = 0;
+                if (key->code==sf::Keyboard::Key::Down && cursorY < bufc()-1) cursorY++;
+                if (key->code==sf::Keyboard::Key::Up   && cursorY > 0) cursorY--;
 
                 if (key->code == sf::Keyboard::Key::Backspace && cursorX > 0) {
-                    current_line.erase(cursorX-1, 1);
+                    lines[cursorY].erase(cursorX-1, 1);
                     cursorX--;
-                    text.setString(current_line);
+                    text.setString(lines[cursorY]);
                 }
                 if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY)) {
-                    current_line.erase(cursorX, 1);
-                    text.setString(current_line);
+                    lines[cursorY].erase(cursorX, 1);
+                    text.setString(lines[cursorY]);
                 }
 
                 if (key->code == sf::Keyboard::Key::Tab) {
                     for (int i = 0; i < 4; i++) {
-                        current_line.insert(cursorX, 1, ' ');
+                        lines[cursorY].insert(cursorX, 1, ' ');
                         cursorX++;
                     }
-                    text.setString(current_line);
+                    text.setString(lines[cursorY]);
+                }
+                if (key->code == sf::Keyboard::Key::Enter) {
+                    std::string rest = lines[cursorY].substr(cursorX);
+                    lines[cursorY].erase(cursorX);
+                    lines.insert(lines.begin() + cursorY + 1, rest);
+                    cursorY++;
+                    cursorX=0;
                 }
             }
 
             if (const auto* t = event->getIf<sf::Event::TextEntered>()) {
                 if (t->unicode >= 32 && t->unicode < 127) {
-                    current_line.insert(cursorX, 1, static_cast<char>(t->unicode));
+                    lines[cursorY].insert(cursorX, 1, static_cast<char>(t->unicode));
                     cursorX++;
-                    text.setString(current_line);
+                    text.setString(lines[cursorY]);
                 }
             }
         }
 
-        cursor.setPosition({20.f + cursorX * charw, 0.f});
-
+        cursor.setPosition({text_x + cursorX * charw, text_y + cursorY * line_height});
         window.clear(sf::Color(30, 30, 30));
 
-        window.draw(text);
+        for (int i = 0; i < (int)lines.size(); i++) {
+            text.setString(lines[i]);
+            text.setPosition({text_x, text_y + i * line_height});
+            window.draw(text);
+        }
         window.draw(cursor);
 
         window.display();
