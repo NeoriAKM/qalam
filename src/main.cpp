@@ -74,7 +74,7 @@ int main() {
                     if (cursorX < buflen(cursorY))
                         cursorX++;
                     else if (cursorY != bufc()-1) {
-                        cursorX=0;
+                        cursorX=0; 
                         cursorY++;
                     }
                 }
