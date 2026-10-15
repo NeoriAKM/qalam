@@ -2,34 +2,63 @@
 // Copyright NeoriAKM(c)
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Shape.hpp>
 #include <iostream>
 #include <string>
-// #include <fstream>
+#include <fstream>
 
-// std::ifstream textfile("etc/text.txt");
-std::vector<std::string> lines;
+std::vector<std::string> lines = {};
 std::string placeholder = "Qalam Text Editor. Live long and prosper!";
+int offsetY = 0;
 
 int buflen(int line) {return (int)lines[line].size();}
 int bufc() {return (int)lines.size();}
 
 /*-------------------------------------------------------*/
 
-int main() {
-    /*
-    if (!textfile.is_open()) {
-        std::cerr << "WARN: File unaviable to open\n";
-        return 1;
+void save(const std::vector<std::string>& list) {
+    std::ofstream out("etc/text.txt");
+    if (!out.is_open()) {
+        std::cerr << "Cannot open file for writing\n";
+        return;
     }
-    */
+    for (const auto& line : list) {
+        out << line << '\n';
+    }
+}
 
-    sf::RenderWindow window(sf::VideoMode({800, 600}), "Qalam");
+int main() {
+    std::ifstream in("etc/text.txt");
+
+    if (in.is_open()) {
+        std::string line;
+        while (std::getline(in, line)) {
+            lines.push_back(line);
+        }
+        in.close();
+    }
+    if (lines.empty()) {
+        lines.push_back(placeholder);
+    }
+
+    sf::Vector2f windowSize(800.f, 600.f);
+
+    sf::RenderWindow window(
+        sf::VideoMode({
+            (unsigned int)windowSize.x,
+            (unsigned int)windowSize.y
+        }),
+        "Qalam"
+    );
+    window.setFramerateLimit(60);
+
     sf::Font font;
     if (!font.openFromFile("etc/font.ttf")) {
         std::cout << "Font not found, Sorry. [return 1]\n";
         return 1;
     }
-    lines.emplace_back(placeholder);
 
     int charsize = 20;
     
@@ -49,6 +78,14 @@ int main() {
 
     sf::Text text(font, lines[cursorY], charsize);
     sf::RectangleShape cursor({2.f, line_height});
+
+    sf::RectangleShape save_button(sf::Vector2f(200, 120));
+    save_button.setPosition(sf::Vector2f(windowSize.x-220, windowSize.y-140));
+    save_button.setFillColor(sf::Color::Blue);
+
+    sf::Text save_label(font, "Save", 25);
+    save_label.setPosition({windowSize.x - 220.f, windowSize.y - 140.f});
+    save_label.setFillColor(sf::Color::White);
 
     cursor.setFillColor(sf::Color::White);
     text.setPosition({20.f, 0.f});
@@ -103,16 +140,15 @@ int main() {
                         lines[cursorY].erase(cursorX - 1, 1);
                         cursorX--;
                     } else if (cursorY > 0) {
+                        int old_len = buflen(cursorY - 1);
                         lines[cursorY - 1] += lines[cursorY];
                         lines.erase(lines.begin() + cursorY);
                         cursorY--;
-                        cursorX = buflen(cursorY - 1);
+                        cursorX = old_len;
                     }
-                    text.setString(lines[cursorY]);
                 }
                 if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY)) {
                     lines[cursorY].erase(cursorX, 1);
-                    text.setString(lines[cursorY]);
                 }
 
                 if (key->code == sf::Keyboard::Key::Tab) {
@@ -120,7 +156,6 @@ int main() {
                         lines[cursorY].insert(cursorX, 1, ' ');
                         cursorX++;
                     }
-                    text.setString(lines[cursorY]);
                 }
                 if (key->code == sf::Keyboard::Key::Enter) {
                     std::string rest = lines[cursorY].substr(cursorX);
@@ -128,7 +163,6 @@ int main() {
                     lines.insert(lines.begin() + cursorY + 1, rest);
                     cursorY++;
                     cursorX=0;
-                    text.setString(lines[cursorY]);
                 }
             }
 
@@ -136,11 +170,22 @@ int main() {
                 if (t->unicode >= 32 && t->unicode < 127) {
                     lines[cursorY].insert(cursorX, 1, static_cast<char>(t->unicode));
                     cursorX++;
-                    text.setString(lines[cursorY]);
                 }
             }
-        }
+            if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouse->button == sf::Mouse::Button::Left) {
+                    sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
+                    if (save_button.getGlobalBounds().contains(pos)) {
+                        save(lines);
+                        save_button.setFillColor(sf::Color::Cyan);
+                    }
+                }
+            } else save_button.setFillColor(sf::Color::Blue);
 
+            if (const auto* mouse = event->getIf<sf::Event::MouseWheelScrolled>()) {
+                if (mouse->wheel == sf::Mouse::Wheel::Vertical) {}
+            }
+        }
         cursor.setPosition({text_x + cursorX * charw, text_y + cursorY * line_height});
         window.clear(sf::Color(30, 30, 30));
 
@@ -150,6 +195,8 @@ int main() {
             window.draw(text);
         }
         window.draw(cursor);
+        window.draw(save_button);
+        window.draw(save_label);
 
         window.display();
     }
