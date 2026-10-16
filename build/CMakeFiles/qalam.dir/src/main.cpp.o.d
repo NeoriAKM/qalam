@@ -262,8 +262,9 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
  /usr/include/SFML/System/MemoryInputStream.hpp \
  /usr/include/SFML/System/Sleep.hpp \
  /usr/include/SFML/System/TimeoutWithPredicate.hpp \
- /usr/include/SFML/System/Version.hpp /usr/include/c++/16/iostream \
- /usr/include/c++/16/fstream \
+ /usr/include/SFML/System/Version.hpp /usr/include/c++/16/cstring \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/include/c++/16/iostream /usr/include/c++/16/fstream \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/basic_file.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++io.h \
  /usr/include/c++/16/bits/fstream.tcc

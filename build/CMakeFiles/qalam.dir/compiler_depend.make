@@ -283,6 +283,7 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
   /usr/include/c++/16/cstdint \
   /usr/include/c++/16/cstdio \
   /usr/include/c++/16/cstdlib \
+  /usr/include/c++/16/cstring \
   /usr/include/c++/16/ctime \
   /usr/include/c++/16/cwchar \
   /usr/include/c++/16/cwctype \
@@ -377,6 +378,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
   /usr/include/stdint.h \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
+  /usr/include/string.h \
+  /usr/include/strings.h \
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/single_threaded.h \
@@ -483,6 +486,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 
 /usr/include/sys/single_threaded.h:
 
+/usr/include/string.h:
+
 /usr/include/stdlib.h:
 
 /usr/include/locale.h:
@@ -588,6 +593,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/c++/16/cwchar:
 
 /usr/include/c++/16/ctime:
+
+/usr/include/c++/16/cstring:
 
 /usr/include/c++/16/cstdio:
 
@@ -952,6 +959,8 @@ CMakeFiles/qalam.dir/src/main.cpp.o:
 /usr/include/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/SFML/Graphics/Glsl.hpp:
+
+/usr/include/strings.h:
 
 /usr/include/c++/16/system_error:
 
