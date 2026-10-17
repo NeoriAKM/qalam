@@ -1,3 +1,0 @@
-/home/akm/doc/c/qalam/build/CMakeFiles/qalam.dir
-/home/akm/doc/c/qalam/build/CMakeFiles/edit_cache.dir
-/home/akm/doc/c/qalam/build/CMakeFiles/rebuild_cache.dir
