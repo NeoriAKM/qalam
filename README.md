@@ -4,6 +4,8 @@ My first C++ project. A lightweight text editor written in C++ using SFML.
 
 The name comes from the Arabic word قلم (qalam), meaning "pen".
 
+![](img/img1.png)
+
 ## Features
 - Basic work with lines, like any other text editor
 - Saving files

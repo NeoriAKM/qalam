@@ -17,25 +17,18 @@
 
 //#include <cstdlib>
 
-std::vector<std::string> lines = {};
-std::string placeholder = "Qalam. Live long and prosper!";
-std::string save_filename = "unnamed.txt";
 
 /*
 std::vector<std::string> fonts = {
     "etc/font.ttf",                                        // classic
     "/usr/share/fonts/TTF/DejaVuSansMono.ttf",             // Arch
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", // Debian
-};
-Coming soon
+    };
+    Coming soon
 */
 
-bool debug_mode = false;
 
-
-size_t buflen(int line) {return (int)lines[line].size();}
-size_t bufc() {return (int)lines.size();}
-
+static size_t buflen(int line, const std::vector<std::string>& lines) {return (int)lines[line].size();}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
@@ -43,9 +36,14 @@ size_t bufc() {return (int)lines.size();}
 
 int main(int argc, char* argv[]) {
     Config config;
-    
     config.load();
 
+    bool debug_mode = false;
+
+    std::vector<std::string> lines = {};
+    std::string placeholder = "Qalam. Live long and prosper!";
+    std::string save_filename = "unnamed.txt";
+    
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
     
@@ -59,7 +57,7 @@ int main(int argc, char* argv[]) {
             std::cout << "+---------------------------------------------+\n";
             std::cout << "| qalam <file>  -  open this file with qalam  |\n";
             std::cout << "+---------------------------------------------+\n";
-            std::cout << "| --help -h        - opening this reference   |\n";
+            std::cout << "| --help  -h       - opening this reference   |\n";
             std::cout << "| --debug -d       - turning on debug mode    |\n";
             std::cout << "+---------------------------------------------+\n";
             return 0;
@@ -120,19 +118,15 @@ int main(int argc, char* argv[]) {
     const sf::Glyph& glyph = font.getGlyph('M', font_size, false);
     float charw = glyph.advance;
     
-    int cursorY = bufc()-1;
-    int cursorX = buflen(cursorY);
+    int cursorY = (int)lines.size()-1;
+    int cursorX = buflen(cursorY, lines);
 
     int offsetY = 0;
     int offsetX = 0;
-    
 
     const float line_height = font.getLineSpacing(font_size);
     const float text_x = 20.f;
     const float text_y = 20.f;
-
-
-    // std::string& current_line = lines[cursorY];
 
     sf::Text text(font, lines[cursorY], font_size);
     sf::Text save_label(font, "Save", 25);
@@ -154,7 +148,7 @@ int main(int argc, char* argv[]) {
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                if (debug_mode) for (int i=0; i<bufc(); i++) {std::cout << lines[i] << '\n';}
+                if (debug_mode) for (int i=0; i<(int)lines.size(); i++) {std::cout << lines[i] << '\n';}
                 window.close();
             }
 
@@ -165,13 +159,13 @@ int main(int argc, char* argv[]) {
                     if (cursorX > 0) cursorX--;
                     else if (cursorY > 0) {
                         cursorY--;
-                        cursorX = buflen(cursorY);
+                        cursorX = buflen(cursorY, lines);
                     }
                 }
                 if (key->code==sf::Keyboard::Key::Right) {
-                    if (cursorX < buflen(cursorY))
+                    if (cursorX < buflen(cursorY, lines))
                         cursorX++;
-                    else if (cursorY != bufc()-1) {
+                    else if (cursorY != (int)lines.size()-1) {
                         cursorX=0; 
                         cursorY++;
                     }
@@ -179,17 +173,17 @@ int main(int argc, char* argv[]) {
 
                 // ========== Up-Down keys ==========
 
-                if (key->code == sf::Keyboard::Key::Down && cursorY < bufc()-1) {
+                if (key->code == sf::Keyboard::Key::Down && cursorY < (int)lines.size()-1) {
                     cursorY++;
-                    if (cursorX > buflen(cursorY)) {
-                        cursorX = buflen(cursorY);
+                    if (cursorX > buflen(cursorY, lines)) {
+                        cursorX = buflen(cursorY, lines);
                     }
                 }
                 if (key->code==sf::Keyboard::Key::Up) {
                     if (cursorY > 0) {
                         cursorY--;
-                        if (cursorX > buflen(cursorY)) {
-                            cursorX = buflen(cursorY);
+                        if (cursorX > buflen(cursorY, lines)) {
+                            cursorX = buflen(cursorY, lines);
                         }
                     }
                 }
@@ -201,14 +195,14 @@ int main(int argc, char* argv[]) {
                         lines[cursorY].erase(cursorX - 1, 1);
                         cursorX--;
                     } else if (cursorY > 0) {
-                        int old_len = buflen(cursorY - 1);
+                        int old_len = buflen(cursorY - 1, lines);
                         lines[cursorY - 1] += lines[cursorY];
                         lines.erase(lines.begin() + cursorY);
                         cursorY--;
                         cursorX = old_len;
                     }
                 }
-                if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY)) {
+                if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY, lines)) {
                     lines[cursorY].erase(cursorX, 1);
                 }
 
