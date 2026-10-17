@@ -129,6 +129,30 @@ qalam/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/build
 .PHONY : qalam/fast
 
+src/config.o: src/config.cpp.o
+.PHONY : src/config.o
+
+# target to build an object file
+src/config.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/config.cpp.o
+.PHONY : src/config.cpp.o
+
+src/config.i: src/config.cpp.i
+.PHONY : src/config.i
+
+# target to preprocess a source file
+src/config.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/config.cpp.i
+.PHONY : src/config.cpp.i
+
+src/config.s: src/config.cpp.s
+.PHONY : src/config.s
+
+# target to generate assembly for a file
+src/config.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/config.cpp.s
+.PHONY : src/config.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -153,6 +177,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/saving.o: src/saving.cpp.o
+.PHONY : src/saving.o
+
+# target to build an object file
+src/saving.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/saving.cpp.o
+.PHONY : src/saving.cpp.o
+
+src/saving.i: src/saving.cpp.i
+.PHONY : src/saving.i
+
+# target to preprocess a source file
+src/saving.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/saving.cpp.i
+.PHONY : src/saving.cpp.i
+
+src/saving.s: src/saving.cpp.s
+.PHONY : src/saving.s
+
+# target to generate assembly for a file
+src/saving.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/qalam.dir/build.make CMakeFiles/qalam.dir/src/saving.cpp.s
+.PHONY : src/saving.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +210,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... qalam"
+	@echo "... src/config.o"
+	@echo "... src/config.i"
+	@echo "... src/config.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/saving.o"
+	@echo "... src/saving.i"
+	@echo "... src/saving.s"
 .PHONY : help
 
 

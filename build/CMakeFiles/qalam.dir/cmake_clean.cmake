@@ -1,7 +1,11 @@
 file(REMOVE_RECURSE
   "CMakeFiles/qalam.dir/link.d"
+  "CMakeFiles/qalam.dir/src/config.cpp.o"
+  "CMakeFiles/qalam.dir/src/config.cpp.o.d"
   "CMakeFiles/qalam.dir/src/main.cpp.o"
   "CMakeFiles/qalam.dir/src/main.cpp.o.d"
+  "CMakeFiles/qalam.dir/src/saving.cpp.o"
+  "CMakeFiles/qalam.dir/src/saving.cpp.o.d"
   "qalam"
   "qalam.pdb"
 )

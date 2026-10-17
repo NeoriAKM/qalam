@@ -1,7 +1,8 @@
 CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
- /usr/include/stdc-predef.h /usr/include/SFML/Graphics.hpp \
- /usr/include/SFML/Graphics/BlendMode.hpp \
- /usr/include/SFML/Graphics/Export.hpp /usr/include/SFML/Config.hpp \
+ /usr/include/stdc-predef.h /usr/include/SFML/Window/Keyboard.hpp \
+ /usr/include/SFML/Window/Export.hpp /usr/include/SFML/Config.hpp \
+ /usr/include/SFML/Graphics.hpp /usr/include/SFML/Graphics/BlendMode.hpp \
+ /usr/include/SFML/Graphics/Export.hpp \
  /usr/include/SFML/Graphics/CircleShape.hpp \
  /usr/include/SFML/Graphics/Shape.hpp \
  /usr/include/SFML/Graphics/Color.hpp /usr/include/c++/16/cstdint \
@@ -121,8 +122,7 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
  /usr/include/SFML/Graphics/ConvexShape.hpp \
  /usr/include/SFML/Graphics/Font.hpp /usr/include/SFML/Graphics/Glyph.hpp \
  /usr/include/SFML/Graphics/Texture.hpp \
- /usr/include/SFML/Window/GlResource.hpp \
- /usr/include/SFML/Window/Export.hpp /usr/include/c++/16/memory \
+ /usr/include/SFML/Window/GlResource.hpp /usr/include/c++/16/memory \
  /usr/include/c++/16/bits/stl_tempbuf.h \
  /usr/include/c++/16/bits/stl_raw_storage_iter.h \
  /usr/include/c++/16/bits/align.h /usr/include/c++/16/bits/unique_ptr.h \
@@ -241,8 +241,7 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
  /usr/include/SFML/System/Utf.hpp /usr/include/SFML/System/Utf.inl \
  /usr/include/SFML/System/Err.hpp /usr/include/c++/16/iterator \
  /usr/include/c++/16/bits/stream_iterator.h \
- /usr/include/SFML/System/String.inl \
- /usr/include/SFML/Window/Keyboard.hpp /usr/include/SFML/Window/Mouse.hpp \
+ /usr/include/SFML/System/String.inl /usr/include/SFML/Window/Mouse.hpp \
  /usr/include/SFML/Window/Sensor.hpp /usr/include/SFML/System/Vector3.hpp \
  /usr/include/SFML/System/Vector3.inl /usr/include/c++/16/variant \
  /usr/include/c++/16/bits/monostate.h /usr/include/SFML/Window/Event.inl \
@@ -262,9 +261,11 @@ CMakeFiles/qalam.dir/src/main.cpp.o: /home/akm/doc/c/qalam/src/main.cpp \
  /usr/include/SFML/System/MemoryInputStream.hpp \
  /usr/include/SFML/System/Sleep.hpp \
  /usr/include/SFML/System/TimeoutWithPredicate.hpp \
- /usr/include/SFML/System/Version.hpp /usr/include/c++/16/cstring \
- /usr/include/string.h /usr/include/strings.h \
- /usr/include/c++/16/iostream /usr/include/c++/16/fstream \
+ /usr/include/SFML/System/Version.hpp /usr/include/c++/16/iostream \
+ /usr/include/c++/16/fstream \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/basic_file.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++io.h \
- /usr/include/c++/16/bits/fstream.tcc
+ /usr/include/c++/16/bits/fstream.tcc /usr/include/c++/16/cstring \
+ /usr/include/string.h /usr/include/strings.h \
+ /home/akm/doc/c/qalam/src/inc/saving.hpp \
+ /home/akm/doc/c/qalam/src/inc/config.hpp

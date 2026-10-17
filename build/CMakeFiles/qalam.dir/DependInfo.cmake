@@ -8,7 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/akm/doc/c/qalam/src/config.cpp" "CMakeFiles/qalam.dir/src/config.cpp.o" "gcc" "CMakeFiles/qalam.dir/src/config.cpp.o.d"
   "/home/akm/doc/c/qalam/src/main.cpp" "CMakeFiles/qalam.dir/src/main.cpp.o" "gcc" "CMakeFiles/qalam.dir/src/main.cpp.o.d"
+  "/home/akm/doc/c/qalam/src/saving.cpp" "CMakeFiles/qalam.dir/src/saving.cpp.o" "gcc" "CMakeFiles/qalam.dir/src/saving.cpp.o.d"
   "" "qalam" "gcc" "CMakeFiles/qalam.dir/link.d"
   )
 

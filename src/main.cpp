@@ -1,122 +1,57 @@
-// Qalam - Text editor v1.0
+// Qalam - Text editor v1.1
 // Copyright NeoriAKM(c)
 
+#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Shape.hpp>
-#include <cstring>
+
 #include <iostream>
-#include <string>
 #include <fstream>
+#include <cstring>
+#include <string>
+
+#include "inc/saving.hpp"
+#include "inc/config.hpp"
+
+//#include <cstdlib>
 
 std::vector<std::string> lines = {};
-std::string placeholder = "Qalam Text Editor. Live long and prosper!";
-int offsetY = 0;
-std::string save_filename = "etc/text.txt";
+std::string placeholder = "Qalam. Live long and prosper!";
+std::string save_filename = "unnamed.txt";
 
-int buflen(int line) {return (int)lines[line].size();}
-int bufc() {return (int)lines.size();}
+/*
+std::vector<std::string> fonts = {
+    "etc/font.ttf",                                        // classic
+    "/usr/share/fonts/TTF/DejaVuSansMono.ttf",             // Arch
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", // Debian
+};
+Coming soon
+*/
 
-/*-------------------------------------------------------*/
-
-void save(const std::vector<std::string>& list, std::string filename) {
-    std::ofstream out(filename);
-    if (!out.is_open()) {
-        std::cerr << "Cannot open file for writing\n";
-        return;
-    }
-    for (const auto& line : list) {
-        out << line << '\n';
-    }
-}
+bool debug_mode = false;
 
 
-void make_save_window() {
-    sf::Vector2f windowSize(300.f, 100.f);
+size_t buflen(int line) {return (int)lines[line].size();}
+size_t bufc() {return (int)lines.size();}
 
-    sf::RenderWindow window(
-        sf::VideoMode({
-            (unsigned int)windowSize.x,
-            (unsigned int)windowSize.y
-        }),
-        "Save window"
-    );
-    window.setFramerateLimit(30);
-
-    sf::Font font;
-    if (!font.openFromFile("etc/font.ttf")) {
-        std::cout << "Font not found, Sorry. [return 1]\n";
-        return;
-    }
-
-    int charsize = 15;
-    
-    const sf::Glyph& glyph = font.getGlyph('M', charsize, false);
-    float charw = glyph.advance;
-    
-    int cursorX = 0;
-
-    const float line_height = font.getLineSpacing(charsize);
-
-    sf::Text text(font, save_filename, charsize);
-    sf::RectangleShape cursor({2.f, line_height});
-
-    cursor.setFillColor(sf::Color::White);
-    text.setPosition({10.f, 5.f});
- 
-    while (window.isOpen()) {
-        while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) window.close();
-            
-            if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                // ========== Left Right keys ==========
-                if (key->code==sf::Keyboard::Key::Left && cursorX > 0) cursorX--;
-                if (key->code==sf::Keyboard::Key::Right && cursorX < (int)save_filename.size()) cursorX++;
-                
-                // ========== Up-Down keys ==========
-                if (key->code == sf::Keyboard::Key::Down) cursorX = 0;
-                if (key->code==sf::Keyboard::Key::Up) cursorX = (int)save_filename.size();
-                
-                // ========== Delete keys ==========
-                if (key->code == sf::Keyboard::Key::Backspace && cursorX > 0) {
-                    save_filename.erase(cursorX - 1, 1);
-                    cursorX--;
-                }
-                if (key->code == sf::Keyboard::Key::Delete && cursorX < (int)save_filename.size()) save_filename.erase(cursorX, 1);
-                if (key->code == sf::Keyboard::Key::Enter) {
-                    save(lines, save_filename);
-                    window.close();
-                }
-            }
-
-            if (const auto* t = event->getIf<sf::Event::TextEntered>()) {
-                if (t->unicode >= 32 && t->unicode < 127) {
-                    save_filename.insert(cursorX, 1, static_cast<char>(t->unicode));
-                    cursorX++;
-                }
-            }
-        }
-        text.setString(save_filename);
-        cursor.setPosition({10.f + cursorX * charw, 5.f});
-        window.clear(sf::Color(30, 30, 30));
-
-        window.draw(text);
-        window.draw(cursor);
-
-        window.display();
-    }
-}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
 //////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
+    Config config;
+    
+    config.load();
 
+    sf::Color theme_color1 = sf::Color::White; // fg
+    sf::Color theme_color2 = sf::Color::Black; // bg
+    
     for (int i=0; i<argc; i++) {
         if (i == 0) continue;
-
+        
         else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
             std::cout << "+-------------------- help -------------------+\n";
             std::cout << "| left  click to button - quick save          |\n";
@@ -124,13 +59,37 @@ int main(int argc, char* argv[]) {
             std::cout << "+---------------------------------------------+\n";
             std::cout << "| qalam <file>  -  open this file with qalam  |\n";
             std::cout << "+---------------------------------------------+\n";
+            std::cout << "| --help -h        - opening this reference   |\n";
+            std::cout << "| --debug -d       - turning on debug mode    |\n";
+            std::cout << "+---------------------------------------------+\n";
             return 0;
+        } else if (std::strcmp(argv[i], "--debug") == 0 || std::strcmp(argv[i], "-d") == 0) {
+            debug_mode = true;
         } else if (argv[i][0] != '-') {
             save_filename = argv[i];
         }
     }
 
-    ////////////////////////////////////////////////////
+    /////////////// config //////////////////
+
+    std::string font_path = config.font_path;
+    int font_size = config.font_size;
+    std::string theme = config.theme;
+    
+    if (debug_mode) {
+        std::cout << "Font: " << font_path << '\n';
+        std::cout << "Size: " << font_size << '\n';
+        std::cout << "Theme: "<< theme     << '\n';
+    }
+
+
+    if (theme == "light") {
+        theme_color1 = sf::Color::Black;
+        theme_color2 = sf::Color::White;
+    }
+
+    ///////////////////////////////////////////////
+
     std::ifstream in(save_filename);
 
     if (in.is_open()) {
@@ -144,57 +103,58 @@ int main(int argc, char* argv[]) {
         lines.push_back(placeholder);
     }
 
-    sf::Vector2f windowSize(800.f, 600.f);
+    sf::Vector2f windowSize(1000.f, 600.f); // 5:3
 
     sf::RenderWindow window(
-        sf::VideoMode({
-            (unsigned int)windowSize.x,
-            (unsigned int)windowSize.y
-        }),
-        "Qalam"
-    );
+        sf::VideoMode({(unsigned int)windowSize.x, (unsigned int)windowSize.y}),
+        sf::String("Qalam: '") + sf::String(save_filename) + "'"
+)   ;
     window.setFramerateLimit(60);
 
     sf::Font font;
-    if (!font.openFromFile("etc/font.ttf")) {
+    if (!font.openFromFile(font_path)) {
         std::cout << "Font not found, Sorry. [return 1]\n";
         return 1;
     }
-
-    int charsize = 20;
     
-    const sf::Glyph& glyph = font.getGlyph('M', charsize, false);
+    const sf::Glyph& glyph = font.getGlyph('M', font_size, false);
     float charw = glyph.advance;
     
-    int cursorY = 0;
+    int cursorY = bufc()-1;
     int cursorX = buflen(cursorY);
+
+    int offsetY = 0;
+    int offsetX = 0;
     
 
-    const float line_height = font.getLineSpacing(charsize);
+    const float line_height = font.getLineSpacing(font_size);
     const float text_x = 20.f;
     const float text_y = 20.f;
 
 
     // std::string& current_line = lines[cursorY];
 
-    sf::Text text(font, lines[cursorY], charsize);
-    sf::RectangleShape cursor({2.f, line_height});
-
-    sf::RectangleShape save_button(sf::Vector2f(100, 40));
-    save_button.setPosition(sf::Vector2f(windowSize.x-120, windowSize.y-60));
-    save_button.setFillColor(sf::Color::Blue);
-
+    sf::Text text(font, lines[cursorY], font_size);
     sf::Text save_label(font, "Save", 25);
+    sf::RectangleShape save_button(sf::Vector2f(100, 40));
+    sf::RectangleShape cursor({2.f, line_height});
+    
+    save_button.setPosition(sf::Vector2f(windowSize.x-120, windowSize.y-60));
     save_label.setPosition({windowSize.x - 110.f, windowSize.y - 60.f});
-    save_label.setFillColor(sf::Color::White);
-
-    cursor.setFillColor(sf::Color::White);
     text.setPosition({20.f, 0.f});
- 
+    
+    text.setFillColor(theme_color1);
+    save_button.setFillColor(sf::Color::Blue);
+    save_label.setFillColor(sf::Color::White);
+    cursor.setFillColor(theme_color1);
+
+
+    ////////////////////// MAINLOOP ///////////////////////////
+
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                for (int i=0; i<bufc(); i++) {std::cout << lines[i] << '\n';}
+                if (debug_mode) for (int i=0; i<bufc(); i++) {std::cout << lines[i] << '\n';}
                 window.close();
             }
 
@@ -285,29 +245,64 @@ int main(int argc, char* argv[]) {
                 } else if (mouse->button == sf::Mouse::Button::Right) {
                     sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
                     if (save_button.getGlobalBounds().contains(pos)) {
-                        make_save_window();
-                        // save(lines, save_filename);
+                        make_save_window(save_filename, lines);
                         save_button.setFillColor(sf::Color::Cyan);
                     }
                 }
             } else save_button.setFillColor(sf::Color::Blue);
 
+            /*
+            
+                MOUSE SCROLL PART
+            
+            */
             if (const auto* mouse = event->getIf<sf::Event::MouseWheelScrolled>()) {
+    
+                bool shift_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || 
+                                     sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
+
                 if (mouse->wheel == sf::Mouse::Wheel::Vertical) {
-                    offsetY -= (int)(mouse->delta * line_height * 3);
-                    
-                    float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 60.f);
-                    if (offsetY < 0) offsetY = 0;
-                    if (offsetY > max_scroll) offsetY = max_scroll;
+                    if (shift_pressed) {
+                        offsetX -= (int)(mouse->delta * charw * 5);
+
+                        int max_line_length = 0;
+                        for(const auto&line:lines) {
+                            if((int)line.size()>max_line_length)max_line_length=line.size();
+                        }
+                        float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
+                        
+                        if (offsetX < 0) offsetX = 0;
+                        if (offsetX > max_scroll) offsetX = max_scroll;
+
+                    } else {
+                        // Vertical
+                        offsetY -= (int)(mouse->delta * line_height * 3);
+                        float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 60.f);
+                        if (offsetY < 0) offsetY = 0;
+                        if (offsetY > max_scroll) offsetY = max_scroll;
+                    }
+                } 
+                // Horizontal toychpad
+                else if (mouse->wheel == sf::Mouse::Wheel::Horizontal) {
+                    offsetX -= (int)(mouse->delta * charw * 5);
+
+                    int max_line_length = 0;
+                    for(const auto&line:lines)if((int)line.size()>max_line_length)max_line_length=line.size();
+                    float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
+                        
+                    if (offsetX < 0) offsetX = 0;
+                    if (offsetX > max_scroll) offsetX = max_scroll;
                 }
             }
         }
-        cursor.setPosition({text_x + cursorX * charw, text_y + cursorY * line_height - offsetY});
-        window.clear(sf::Color(30, 30, 30));
+        cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});
+
+        if (theme == "dark") window.clear(sf::Color(30, 30, 30));
+        else window.clear(sf::Color(245, 245, 220));
 
         for (int i = 0; i < (int)lines.size(); i++) {
             text.setString(lines[i]);
-            text.setPosition({text_x, text_y + i * line_height - offsetY});
+            text.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
             window.draw(text);
         }
         window.draw(cursor);

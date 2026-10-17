@@ -1,2 +1,2 @@
-cmake --build build
+cmake --build build -j2
 build/qalam

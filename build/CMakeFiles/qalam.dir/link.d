@@ -3,6 +3,8 @@ qalam: \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/../../../../lib/crti.o \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o \
   CMakeFiles/qalam.dir/src/main.cpp.o \
+  CMakeFiles/qalam.dir/src/saving.cpp.o \
+  CMakeFiles/qalam.dir/src/config.cpp.o \
   /usr/lib/libsfml-graphics.so.3.1.0 \
   /usr/lib/libsfml-window.so.3.1.0 \
   /usr/lib/libsfml-system.so.3.1.0 \
@@ -66,6 +68,10 @@ qalam: \
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/crtbeginS.o:
 
 CMakeFiles/qalam.dir/src/main.cpp.o:
+
+CMakeFiles/qalam.dir/src/saving.cpp.o:
+
+CMakeFiles/qalam.dir/src/config.cpp.o:
 
 /usr/lib/libsfml-graphics.so.3.1.0:
 

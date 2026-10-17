@@ -201,6 +201,9 @@ SFML_DIR:PATH=/usr/lib/cmake/SFML
 //Path to a file.
 SFML_DOC_DIR:PATH=/usr/share/doc/SFML
 
+//The directory containing a CMake configuration file for nlohmann_json.
+nlohmann_json_DIR:PATH=/usr/share/cmake/nlohmann_json
+
 //Value Computed by CMake
 qalam_BINARY_DIR:STATIC=/home/akm/doc/c/qalam/build
 
@@ -355,4 +358,6 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Deprecated.  Use -W[no-]deprecated instead.
 CMAKE_WARN_DEPRECATED:INTERNAL=ON
+//Details about finding nlohmann_json
+FIND_PACKAGE_MESSAGE_DETAILS_nlohmann_json:INTERNAL=[/usr/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake][v3.12.0()]
 
