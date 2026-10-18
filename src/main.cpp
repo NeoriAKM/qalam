@@ -209,7 +209,9 @@ int main(int argc, char* argv[]) {
 
                 if (key->code == sf::Keyboard::Key::Tab) {
                     for (int i = 0; i < 4; i++) {
-                        lines[cursorY].insert(cursorX, 1, ' ');
+                        int spaces = 4 - (cursorX % 4);
+                        for (int i = 0; i < spaces; i++)
+                        {lines[cursorY].insert(cursorX, 1, ' '); cursorX++;}
                         cursorX++;
                     }
                 }
@@ -219,6 +221,12 @@ int main(int argc, char* argv[]) {
                     lines.insert(lines.begin() + cursorY + 1, rest);
                     cursorY++;
                     cursorX=0;
+                }
+                if (key->code == sf::Keyboard::Key::S && key->control) {
+                    save(lines, save_filename);
+                }
+                if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {
+                    make_save_window(save_filename, lines);
                 }
             }
 
