@@ -30,7 +30,7 @@ cmake --build build
 ## Run
 
 ```bash
-./build/qalam <filename>
+./build/qalam [filename]
 ```
 
 ## Flags
@@ -49,14 +49,17 @@ Standart config:
 {
     "font": "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
     "font_size": 20,
-    "theme": "dark"
+    "theme": "dark",
+    "w_width": 1000,
+    "w_height": 600
 }
 ```
 
-- `"font_size"` - any int-typed value
+- `"font_size"` - any int-typed value. `/usr/share/fonts/TTF/DejaVuSansMono.ttf` - path only for Arch linux
 - `"font"` - absolute path to your font
 - `"theme"` - `"dark"` or `"light"`
+- `"w_width"` and `"w_height"` - resolution of window. I don't know how to do it dynamic
 
 ---
 
-Copyright NeoriAKM(c) | made with love and C++
+Copyright NeoriAKM(c) | made with **love** and **C++**
