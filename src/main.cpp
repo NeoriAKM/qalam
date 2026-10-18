@@ -101,12 +101,13 @@ int main(int argc, char* argv[]) {
         lines.push_back(placeholder);
     }
 
-    sf::Vector2f windowSize(1000.f, 600.f); // 5:3
+    sf::Vector2f windowSize(config.w_width, config.w_height);
 
     sf::RenderWindow window(
         sf::VideoMode({(unsigned int)windowSize.x, (unsigned int)windowSize.y}),
         sf::String("Qalam: '") + sf::String(save_filename) + "'"
-)   ;
+    );
+
     window.setFramerateLimit(60);
 
     sf::Font font;

@@ -23,6 +23,8 @@ void Config::load() {
         font_path = config_json.value("font", font_path);
         font_size = config_json.value("font_size", font_size);
         theme = config_json.value("theme", theme);
+        w_width  = config_json.value("w_width" , w_width);
+        w_height = config_json.value("w_height", w_height);
     }
     catch (const nlohmann::json::parse_error& e) {
         std::cerr << "JSON parse error: " << e.what() << '\n';
