@@ -11,6 +11,7 @@ The name comes from the Arabic word قلم (qalam), meaning "pen".
 - Saving files
 - Custom font, font size, and theme via config file
 - Dark and light themes
+- primitive syntax highlight (assemby labels and comments for any lang)
 
 ## Dependencies
 - C++17 compiler (GCC/Clang)

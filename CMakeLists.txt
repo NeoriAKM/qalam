@@ -11,6 +11,7 @@ add_executable(qalam
     src/main.cpp
     src/saving.cpp
     src/config.cpp
+    src/syntax_hl.cpp
 )
 target_link_libraries(qalam PRIVATE
     SFML::Graphics

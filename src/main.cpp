@@ -14,6 +14,7 @@
 
 #include "inc/saving.hpp"
 #include "inc/config.hpp"
+#include "inc/syntax_hl.hpp"
 
 //#include <cstdlib>
 
@@ -73,11 +74,15 @@ int main(int argc, char* argv[]) {
     std::string font_path = config.font_path;
     int font_size = config.font_size;
     std::string theme = config.theme;
+
+    int w_width = config.w_width;
+    int w_height= config.w_height;
     
     if (debug_mode) {
-        std::cout << "Font: " << font_path << '\n';
-        std::cout << "Size: " << font_size << '\n';
-        std::cout << "Theme: "<< theme     << '\n';
+        std::cout << "Font: "  << font_path << '\n';
+        std::cout << "Size: "  << font_size << '\n';
+        std::cout << "Theme: " << theme     << "\n\n";
+        std::cout << "Window: "<< w_width << 'x' << w_height << '\n';
     }
 
 
@@ -101,7 +106,7 @@ int main(int argc, char* argv[]) {
         lines.push_back(placeholder);
     }
 
-    sf::Vector2f windowSize(config.w_width, config.w_height);
+    sf::Vector2f windowSize(w_width, w_height);
 
     sf::RenderWindow window(
         sf::VideoMode({(unsigned int)windowSize.x, (unsigned int)windowSize.y}),
@@ -133,7 +138,7 @@ int main(int argc, char* argv[]) {
     sf::Text save_label(font, "Save", 25);
     sf::RectangleShape save_button(sf::Vector2f(100, 40));
     sf::RectangleShape cursor({2.f, line_height});
-    
+
     save_button.setPosition(sf::Vector2f(windowSize.x-120, windowSize.y-60));
     save_label.setPosition({windowSize.x - 110.f, windowSize.y - 60.f});
     text.setPosition({20.f, 0.f});
@@ -143,6 +148,9 @@ int main(int argc, char* argv[]) {
     save_label.setFillColor(sf::Color::White);
     cursor.setFillColor(theme_color1);
 
+    int first_visible = std::max(0, (int)(offsetY / line_height));
+    int last_visible  = std::min ((int)lines.size() - 1,
+                                  (int)((offsetY + windowSize.y) / line_height) + 1);
 
     ////////////////////// MAINLOOP ///////////////////////////
 
@@ -222,11 +230,21 @@ int main(int argc, char* argv[]) {
                     cursorY++;
                     cursorX=0;
                 }
+                /////////// Ctrl+Something ///////////
                 if (key->code == sf::Keyboard::Key::S && key->control) {
                     save(lines, save_filename);
                 }
                 if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {
                     make_save_window(save_filename, lines);
+                }
+                if (key->code == sf::Keyboard::Key::R && key->control) {
+                    config.load();
+                    font_path = config.font_path;
+                    font_size = config.font_size;
+                    theme     = config.theme;
+
+                    w_width = config.w_width;
+                    w_height= config.w_height;
                 }
             }
 
@@ -300,10 +318,22 @@ int main(int argc, char* argv[]) {
         }
         cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});
 
+        first_visible = std::max(0, (int)(offsetY / line_height));
+        last_visible  = std::min ((int)lines.size() - 1,
+                                  (int)((offsetY + windowSize.y) / line_height) + 1);
+
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(245, 245, 220));
 
-        for (int i = 0; i < (int)lines.size(); i++) {
+        // for (int i = 0; i < (int)lines.size(); i++) {
+        for (int i = first_visible; i <= last_visible; i++) {
+            if (is_comment(lines[i], save_filename)==0) {
+                text.setFillColor(sf::Color(120, 120, 120));
+            } else if (is_label(lines[i], save_filename)==0) {
+                text.setFillColor(sf::Color(255, 255, 0));
+            } else {
+                text.setFillColor(theme_color1);
+            }
             text.setString(lines[i]);
             text.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
             window.draw(text);
