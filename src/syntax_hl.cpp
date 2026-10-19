@@ -1,21 +1,33 @@
 // Syntax highlight for Qalam
 // Copyright (C) NeoriAKM
 
-
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cctype>
 
-std::string get_ext(std::string filename) {
-    size_t pos = filename.find('.');
-    std::string ext;
-    if (pos != std::string::npos) ext = filename.substr(pos + 1);
-    return ext;
+#include <SFML/Graphics/Color.hpp>
+
+using namespace std;
+
+static string lower(string str) {
+    transform(str.begin(), str.end(), str.begin(), [](unsigned char chr){ return std::tolower(chr); });
+    return str;
 }
 
-int is_comment(std::string line, std::string filename) {
-    if (line.empty()) return 1;
-    std::vector<std::string> slashslash = {
+string get_ext(string filename) {
+    size_t slash = filename.find_last_of("/\\");
+    if (slash != string::npos) filename = filename.substr(slash + 1);
+
+    size_t dot = filename.rfind('.');
+    if (dot == string::npos || dot == filename.size() - 1) return "";
+
+    return lower(filename.substr(dot + 1));
+}
+
+bool is_comment(string line, string filename) {
+    if (line.empty()) return false;
+    static const vector<string> slashslash = {
         // C-family
         "c", "h",
         "cpp", "hpp", "cxx", "hxx", "cc", "hh", "cppm", "ixx",
@@ -31,7 +43,7 @@ int is_comment(std::string line, std::string filename) {
         "pas", "pp", "sol", "glsl", "hlsl", "vert", "frag",
         "cu", "cuh", "cl"
     };
-    std::vector<std::string> hash = {
+    static const vector<string> hash = {
         // Python
         "py", "pyw", "pyi",
         // Ruby
@@ -47,7 +59,7 @@ int is_comment(std::string line, std::string filename) {
         "gitignore", "gitattributes", "gitmodules"
     };
 
-    std::vector<std::string> dashdash = {
+    static const vector<string> dashdash = {
         "lua",  "hs",   "lhs",
         "sql",  "adb",  "ads",
         "vhd",  "vhdl", "elm",
@@ -55,31 +67,111 @@ int is_comment(std::string line, std::string filename) {
         "purs","idr", "agda"
     };
 
-    std::vector<std::string> bang = {
+    static const vector<string> bang = {
         "f",   "for", "f77",
         "f90", "f95", "f03",
         "f08", "ftn"
     };
 
-    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-    std::string ext = get_ext(filename);
+    line.erase(remove(line.begin(), line.end(), ' '), line.end());
+    string ext = get_ext(filename);
 
-    if (std::find(slashslash.begin(), slashslash.end(), ext) != slashslash.end()) {
-        if (line[0] == '/' && line[1] == '/') return 0; // comment is //
-    } else if (std::find(hash.begin(), hash.end(), ext) != hash.end()) {
-        if (line[0] == '#') return 0;                   // comments is #
-    } else if (std::find(dashdash.begin(), dashdash.end(), ext) != dashdash.end()) {
-        if (line[0] == '-' && line[1] == '-') return 0; // comment is --
-    } else if (line[0] == ';') {
-        if (line[0] == ';') return 0;                   // comment is ';'
+    if (find(slashslash.begin(), slashslash.end(), ext) != slashslash.end()) {
+        if (line[0] == '/' && line[1] == '/') return true; // comment is //
+    } else if (find(hash.begin(), hash.end(), ext) != hash.end()) {
+        if (line[0] == '#') return true;                   // comments is #
+    } else if (find(dashdash.begin(), dashdash.end(), ext) != dashdash.end()) {
+        if (line[0] == '-' && line[1] == '-') return true; // comment is --
+    } else if (ext == "asm") {
+        if (line[0] == ';') return true;                   // comment is ';'
     }
-    return 1;
+    return false;
 }
 
-int is_label(std::string line, std::string filename) {
-    if (line.empty()) return 1;
-    if (line.back() == ':' && get_ext(filename) == "asm") {
-        return 0;
-    }
-    return 1;
+bool is_label(string line, string filename) { // Labels HL for assembler
+    if (line.empty()) return false;
+    if (line.back() == ':' && get_ext(filename) == "asm") return true;
+    return false;
+}
+
+sf::Color cmd_asm(string line, string filename, sf::Color non) {
+    if (line.empty() || get_ext(filename) != "asm") return non;
+
+    static const vector<string> no_arg_instr = {
+        "nop", "hlt", "pause", "leave", "retn", "retf",
+        "iret", "iretd", "iretq", "sysret", "sysexit",
+        "cpuid", "rdtsc", "rdtscp", "rdpmc",
+        "rdmsr", "wrmsr", "clts", "swapgs",
+        "lfence", "sfence", "mfence",
+        "ud2", "int3", "int1", "into", "icebp",
+        "xlatb", "xlat",
+        "lahf", "sahf",
+        "pushf", "popf", "pushfd", "popfd", "pushfq", "popfq",
+        "pusha", "popa", "pushad", "popad",
+        "cld", "std", "cli", "sti", "cmc", "clc", "stc",
+        "cwd", "cdq", "cqo", "cbw", "cwde", "cdqe",
+        "aaa", "aas", "aam", "aad", "daa", "das",
+        "wait", "fwait",
+        "wbinvd", "invd", "rsm", "getsec",
+        "skinit", "stgi", "clgi",
+        "vmcall", "vmlaunch", "vmresume", "vmxoff", "vmfunc",
+        "xend", "xtest", "serialize",
+        "endbr32", "endbr64",
+        "salc", "lodsb",
+        "fnop", "fchs", "fabs", "fsqrt",
+        "fsin", "fcos", "fsincos",
+        "fptan", "fpatan",
+        "f2xm1", "fyl2x", "fyl2xp1",
+        "fld1", "fldz", "fldpi", "fldl2e", "fldl2t", "fldlg2", "fldln2",
+        "fprem", "fprem1", "fscale", "frndint", "fxtract",
+        "ftst", "fxam",
+        "fincstp", "fdecstp",
+        "finit", "fninit", "fclex", "fnclex",
+        "fcompp", "fucompp",
+        "emms", "vzeroupper", "vzeroall"
+    };
+
+    static const vector<string> spec = {
+        "push",  "pop",  "inc",  "dec",
+        "section","jmp", "je",   "jne",
+        "jc",    "jnc",  "jz",  "jnz",
+        "call", 
+    };
+
+    static const vector<string> AL = {
+        "or", "xor", "and", "not",
+        "add", "sub", "mul", "div",
+        "test"
+    };
+
+    static const vector<string> other = {
+        "ret", "int"
+    };
+
+    size_t i = 0;
+    while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) i++;
+    size_t j = i;
+    while (j < line.size() && (std::isalnum((unsigned char)line[j]) || line[j] == '_')) j++;
+    std::string mnemonic = lower(line.substr(i, j - i));
+
+    if (std::find(no_arg_instr.begin(), no_arg_instr.end(), mnemonic) != no_arg_instr.end())
+        return sf::Color(100, 100, 255);
+    
+    if (std::find(spec.begin(), spec.end(), mnemonic) != spec.end())
+        return sf::Color(100, 200, 200);
+
+    if (std::find(other.begin(), other.end(), mnemonic) != other.end())
+        return sf::Color(50, 255, 50);
+
+    if (std::find(AL.begin(), AL.end(), mnemonic) != AL.end())
+        return sf::Color(200, 0, 255);
+
+    return non;
+}
+
+bool is_macro(string line, string filename) {
+    if (line.empty()) return false;
+    line.erase(remove(line.begin(), line.end(), ' '), line.end());
+    if (line[0] == '%' && get_ext(filename) == "asm") return true;
+    return false;
 }

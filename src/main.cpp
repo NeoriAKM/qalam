@@ -1,4 +1,4 @@
-// Qalam - Text editor v1.1
+// Qalam - Text editor v1.2
 // Copyright NeoriAKM(c)
 
 #include <SFML/Window/Keyboard.hpp>
@@ -55,6 +55,12 @@ int main(int argc, char* argv[]) {
             std::cout << "+-------------------- help -------------------+\n";
             std::cout << "| left  click to button - quick save          |\n";
             std::cout << "| right click to button - choose path to save |\n";
+            std::cout << "|                                             |\n";
+            std::cout << "|       read about config in README.md        |\n";
+            std::cout << "+---------------------------------------------+\n";
+            std::cout << "| Ctrl+S         -  quick save                |\n";
+            std::cout << "| Ctrl+Shift+S   -  save with path choice     |\n";
+            std::cout << "| Ctrl+R         -  reload config             |\n";
             std::cout << "+---------------------------------------------+\n";
             std::cout << "| qalam <file>  -  open this file with qalam  |\n";
             std::cout << "+---------------------------------------------+\n";
@@ -87,7 +93,7 @@ int main(int argc, char* argv[]) {
 
 
     if (theme == "light") {
-        theme_color1 = sf::Color::Black;
+        theme_color1 = sf::Color(50, 50, 50);
         theme_color2 = sf::Color::White;
     }
 
@@ -148,9 +154,8 @@ int main(int argc, char* argv[]) {
     save_label.setFillColor(sf::Color::White);
     cursor.setFillColor(theme_color1);
 
-    int first_visible = std::max(0, (int)(offsetY / line_height));
-    int last_visible  = std::min ((int)lines.size() - 1,
-                                  (int)((offsetY + windowSize.y) / line_height) + 1);
+    int first_visible;
+    int last_visible ;
 
     ////////////////////// MAINLOOP ///////////////////////////
 
@@ -245,6 +250,17 @@ int main(int argc, char* argv[]) {
 
                     w_width = config.w_width;
                     w_height= config.w_height;
+
+                    if (theme == "light") {
+                        theme_color1 = sf::Color(50, 50, 50);
+                        theme_color2 = sf::Color::White;
+                    } else if (theme == "dark") {
+                        theme_color1 = sf::Color::White;
+                        theme_color2 = sf::Color::Black;
+                    }
+
+                    text.setFillColor(theme_color1);
+                    cursor.setFillColor(theme_color1);
                 }
             }
 
@@ -323,16 +339,18 @@ int main(int argc, char* argv[]) {
                                   (int)((offsetY + windowSize.y) / line_height) + 1);
 
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
-        else window.clear(sf::Color(245, 245, 220));
+        else window.clear(sf::Color(255, 239, 223));
 
         // for (int i = 0; i < (int)lines.size(); i++) {
         for (int i = first_visible; i <= last_visible; i++) {
-            if (is_comment(lines[i], save_filename)==0) {
+            if (is_comment(lines[i], save_filename)) {
                 text.setFillColor(sf::Color(120, 120, 120));
-            } else if (is_label(lines[i], save_filename)==0) {
+            } else if (is_label(lines[i], save_filename)) {
                 text.setFillColor(sf::Color(255, 255, 0));
+            } else if (is_macro(lines[i], save_filename)) {
+                text.setFillColor(sf::Color(255, 100, 100));
             } else {
-                text.setFillColor(theme_color1);
+                text.setFillColor(cmd_asm(lines[i], save_filename, theme_color1));
             }
             text.setString(lines[i]);
             text.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
