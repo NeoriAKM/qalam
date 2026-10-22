@@ -52,21 +52,22 @@ int main(int argc, char* argv[]) {
         if (i == 0) continue;
         
         else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
-            std::cout << "+-------------------- help -------------------+\n";
-            std::cout << "| left  click to button - quick save          |\n";
-            std::cout << "| right click to button - choose path to save |\n";
-            std::cout << "|                                             |\n";
-            std::cout << "|       read about config in README.md        |\n";
-            std::cout << "+---------------------------------------------+\n";
-            std::cout << "| Ctrl+S         -  quick save                |\n";
-            std::cout << "| Ctrl+Shift+S   -  save with path choice     |\n";
-            std::cout << "| Ctrl+R         -  reload config             |\n";
-            std::cout << "+---------------------------------------------+\n";
-            std::cout << "| qalam <file>  -  open this file with qalam  |\n";
-            std::cout << "+---------------------------------------------+\n";
-            std::cout << "| --help  -h       - opening this reference   |\n";
-            std::cout << "| --debug -d       - turning on debug mode    |\n";
-            std::cout << "+---------------------------------------------+\n";
+            std::cout << "+-------------------- help --------------------------+\n";
+            std::cout << "| left  click to button - quick save                 |\n";
+            std::cout << "| right click to button - choose path to save        |\n";
+            std::cout << "|                                                    |\n";
+            std::cout << "|          read about config in README.md            |\n";
+            std::cout << "+----------------------------------------------------+\n";
+            std::cout << "| Ctrl+S        -  quick save                        |\n";
+            std::cout << "| Ctrl+Shift+S  -  save with path choice             |\n";
+            std::cout << "| Ctrl+R        -  reload config                     |\n";
+            std::cout << "| Ctrl+U        -  moving cursor to center of screen |\n";
+            std::cout << "+----------------------------------------------------+\n";
+            std::cout << "| qalam <file>  -  open this file with qalam         |\n";
+            std::cout << "+----------------------------------------------------+\n";
+            std::cout << "| --help  -h    - opening this reference             |\n";
+            std::cout << "| --debug -d    - turning on debug mode              |\n";
+            std::cout << "+----------------------------------------------------+\n";
             return 0;
         } else if (std::strcmp(argv[i], "--debug") == 0 || std::strcmp(argv[i], "-d") == 0) {
             debug_mode = true;
@@ -160,6 +161,11 @@ int main(int argc, char* argv[]) {
     ////////////////////// MAINLOOP ///////////////////////////
 
     while (window.isOpen()) {
+
+        first_visible = std::max(0, (int)(offsetY / line_height));
+        last_visible  = std::min((int)lines.size() - 1,
+                                 (int)((offsetY + windowSize.y) / line_height) + 1);
+
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 if (debug_mode) for (int i=0; i<(int)lines.size(); i++) {std::cout << lines[i] << '\n';}
@@ -221,10 +227,9 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (key->code == sf::Keyboard::Key::Tab) {
-                    for (int i = 0; i < 4; i++) {
-                        int spaces = 4 - (cursorX % 4);
-                        for (int i = 0; i < spaces; i++)
-                        {lines[cursorY].insert(cursorX, 1, ' '); cursorX++;}
+                    int spaces = 4 - (cursorX % 4);
+                    for (int i = 0; i < spaces; i++) {
+                        lines[cursorY].insert(cursorX, 1, ' ');
                         cursorX++;
                     }
                 }
@@ -239,9 +244,15 @@ int main(int argc, char* argv[]) {
                 if (key->code == sf::Keyboard::Key::S && key->control) {
                     save(lines, save_filename);
                 }
+                if (key->code == sf::Keyboard::Key::U && key->control) {
+                    cursorY = (last_visible + first_visible) / 2;
+                    cursorX = buflen(cursorY, lines);
+                }
+
                 if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {
                     make_save_window(save_filename, lines);
                 }
+
                 if (key->code == sf::Keyboard::Key::R && key->control) {
                     config.load();
                     font_path = config.font_path;
@@ -332,20 +343,16 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});
 
-        first_visible = std::max(0, (int)(offsetY / line_height));
-        last_visible  = std::min ((int)lines.size() - 1,
-                                  (int)((offsetY + windowSize.y) / line_height) + 1);
+        cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});
 
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
 
         // for (int i = 0; i < (int)lines.size(); i++) {
         for (int i = first_visible; i <= last_visible; i++) {
-            if (is_comment(lines[i], save_filename)) {
-                text.setFillColor(sf::Color(120, 120, 120));
-            } else if (is_label(lines[i], save_filename)) {
+            text.setFillColor(is_comment(lines[i], save_filename, theme_color1));
+            if (is_label(lines[i], save_filename)) {
                 text.setFillColor(sf::Color(255, 255, 0));
             } else if (is_macro(lines[i], save_filename)) {
                 text.setFillColor(sf::Color(255, 100, 100));

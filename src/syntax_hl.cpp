@@ -25,8 +25,9 @@ string get_ext(string filename) {
     return lower(filename.substr(dot + 1));
 }
 
-bool is_comment(string line, string filename) {
-    if (line.empty()) return false;
+sf::Color is_comment(string line, string filename, sf::Color non) {
+    if (line.empty()) return non;
+    sf::Color yeah = {120, 120, 120};
     static const vector<string> slashslash = {
         // C-family
         "c", "h",
@@ -77,15 +78,15 @@ bool is_comment(string line, string filename) {
     string ext = get_ext(filename);
 
     if (find(slashslash.begin(), slashslash.end(), ext) != slashslash.end()) {
-        if (line[0] == '/' && line[1] == '/') return true; // comment is //
+        if (line[0] == '/' && line[1] == '/') return yeah; // comment is //
     } else if (find(hash.begin(), hash.end(), ext) != hash.end()) {
-        if (line[0] == '#') return true;                   // comments is #
+        if (line[0] == '#') return yeah;                   // comments is #
     } else if (find(dashdash.begin(), dashdash.end(), ext) != dashdash.end()) {
-        if (line[0] == '-' && line[1] == '-') return true; // comment is --
+        if (line[0] == '-' && line[1] == '-') return yeah; // comment is --
     } else if (ext == "asm") {
-        if (line[0] == ';') return true;                   // comment is ';'
+        if (line[0] == ';') return yeah;                   // comment is ';'
     }
-    return false;
+    return non;
 }
 
 bool is_label(string line, string filename) { // Labels HL for assembler
