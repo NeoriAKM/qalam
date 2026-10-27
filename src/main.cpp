@@ -1,4 +1,4 @@
-// Qalam - Text editor v1.2
+// Qalam - Text editor v1.2.1
 // Copyright NeoriAKM(c)
 
 #include <SFML/Window/Keyboard.hpp>
@@ -11,8 +11,9 @@
 #include <fstream>
 #include <cstring>
 #include <string>
+#include <algorithm>
 
-#include "inc/saving.hpp"
+#include "inc/dialogues.hpp"
 #include "inc/config.hpp"
 #include "inc/syntax_hl.hpp"
 
@@ -29,7 +30,7 @@ std::vector<std::string> fonts = {
 */
 
 
-static size_t buflen(int line, const std::vector<std::string>& lines) {return (int)lines[line].size();}
+static size_t buflen(int line, const std::vector<std::string>& lines) {return (size_t)lines[line].size();}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
@@ -48,10 +49,8 @@ int main(int argc, char* argv[]) {
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
     
-    for (int i=0; i<argc; i++) {
-        if (i == 0) continue;
-        
-        else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+    for (int i=1; i<argc; i++) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
             std::cout << "+-------------------- help --------------------------+\n";
             std::cout << "| left  click to button - quick save                 |\n";
             std::cout << "| right click to button - choose path to save        |\n";
@@ -82,8 +81,8 @@ int main(int argc, char* argv[]) {
     int font_size = config.font_size;
     std::string theme = config.theme;
 
-    int w_width = config.w_width;
-    int w_height= config.w_height;
+    int w_width = std::max(200, config.w_width);
+    int w_height= std::max(200, config.w_height);
     
     if (debug_mode) {
         std::cout << "Font: "  << font_path << '\n';
@@ -142,18 +141,17 @@ int main(int argc, char* argv[]) {
     const float text_y = 20.f;
 
     sf::Text text(font, lines[cursorY], font_size);
-    sf::Text save_label(font, "Save", 25);
-    sf::RectangleShape save_button(sf::Vector2f(100, 40));
     sf::RectangleShape cursor({2.f, line_height});
 
-    save_button.setPosition(sf::Vector2f(windowSize.x-120, windowSize.y-60));
-    save_label.setPosition({windowSize.x - 110.f, windowSize.y - 60.f});
     text.setPosition({20.f, 0.f});
     
     text.setFillColor(theme_color1);
-    save_button.setFillColor(sf::Color::Blue);
-    save_label.setFillColor(sf::Color::White);
     cursor.setFillColor(theme_color1);
+
+    Button save_button(font, "save",
+        {windowSize.x-120, windowSize.y-60}, {100, 40}, [&]() {
+        save(lines, save_filename);
+    });
 
     int first_visible;
     int last_visible ;
@@ -161,6 +159,13 @@ int main(int argc, char* argv[]) {
     ////////////////////// MAINLOOP ///////////////////////////
 
     while (window.isOpen()) {
+
+        sf::Vector2f mousePos(
+            (float)sf::Mouse::getPosition(window).x, 
+            (float)sf::Mouse::getPosition(window).y
+        );
+
+        save_button.update(mousePos);
 
         first_visible = std::max(0, (int)(offsetY / line_height));
         last_visible  = std::min((int)lines.size() - 1,
@@ -253,7 +258,7 @@ int main(int argc, char* argv[]) {
                     make_save_window(save_filename, lines);
                 }
 
-                if (key->code == sf::Keyboard::Key::R && key->control) {
+                if (key->code == sf::Keyboard::Key::R && key->control && !key->shift) {
                     config.load();
                     font_path = config.font_path;
                     font_size = config.font_size;
@@ -284,25 +289,16 @@ int main(int argc, char* argv[]) {
 
             // Save button Click
             if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
+                sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
                 if (mouse->button == sf::Mouse::Button::Left) {
-                    sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
-                    if (save_button.getGlobalBounds().contains(pos)) {
-                        save(lines, save_filename);
-                        save_button.setFillColor(sf::Color::Cyan);
-                    }
+                    save_button.handleClick(pos, false);
                 } else if (mouse->button == sf::Mouse::Button::Right) {
-                    sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
-                    if (save_button.getGlobalBounds().contains(pos)) {
-                        make_save_window(save_filename, lines);
-                        save_button.setFillColor(sf::Color::Cyan);
-                    }
+                    save_button.handleClick(pos, true);
                 }
-            } else save_button.setFillColor(sf::Color::Blue);
+            }
 
             /*
-            
                 MOUSE SCROLL PART
-            
             */
             if (const auto* mouse = event->getIf<sf::Event::MouseWheelScrolled>()) {
     
@@ -351,21 +347,13 @@ int main(int argc, char* argv[]) {
 
         // for (int i = 0; i < (int)lines.size(); i++) {
         for (int i = first_visible; i <= last_visible; i++) {
-            text.setFillColor(is_comment(lines[i], save_filename, theme_color1));
-            if (is_label(lines[i], save_filename)) {
-                text.setFillColor(sf::Color(255, 255, 0));
-            } else if (is_macro(lines[i], save_filename)) {
-                text.setFillColor(sf::Color(255, 100, 100));
-            } else {
-                text.setFillColor(cmd_asm(lines[i], save_filename, theme_color1));
-            }
+            text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
             text.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
             window.draw(text);
         }
         window.draw(cursor);
         window.draw(save_button);
-        window.draw(save_label);
 
         window.display();
     }

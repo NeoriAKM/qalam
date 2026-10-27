@@ -10,6 +10,15 @@
 
 using namespace std;
 
+bool here(const std::string& str, const std::string& val) {
+    return str.find(val) != std::string::npos;
+}
+
+template <typename Container>
+bool here(const Container& cont, const std::string& val) {
+    return std::find(cont.begin(), cont.end(), val) != cont.end();
+}
+
 static string lower(string str) {
     transform(str.begin(), str.end(), str.begin(), [](unsigned char chr){ return std::tolower(chr); });
     return str;
@@ -27,6 +36,9 @@ string get_ext(string filename) {
 
 sf::Color is_comment(string line, string filename, sf::Color non) {
     if (line.empty()) return non;
+    line.erase(remove(line.begin(), line.end(), ' '), line.end());
+    if (line.empty()) return non;
+
     sf::Color yeah = {120, 120, 120};
     static const vector<string> slashslash = {
         // C-family
@@ -59,7 +71,6 @@ sf::Color is_comment(string line, string filename, sf::Color non) {
         "tcl", "awk", "sed", "cmake", "dockerfile",
         "gitignore", "gitattributes", "gitmodules"
     };
-
     static const vector<string> dashdash = {
         "lua",  "hs",   "lhs",
         "sql",  "adb",  "ads",
@@ -67,21 +78,19 @@ sf::Color is_comment(string line, string filename, sf::Color non) {
         "m",    "applescript",
         "purs","idr", "agda"
     };
-
     static const vector<string> bang = {
         "f",   "for", "f77",
         "f90", "f95", "f03",
         "f08", "ftn"
     };
 
-    line.erase(remove(line.begin(), line.end(), ' '), line.end());
     string ext = get_ext(filename);
 
-    if (find(slashslash.begin(), slashslash.end(), ext) != slashslash.end()) {
+    if (here(slashslash, ext)) {
         if (line[0] == '/' && line[1] == '/') return yeah; // comment is //
-    } else if (find(hash.begin(), hash.end(), ext) != hash.end()) {
+    } else if (here(hash, ext)) {
         if (line[0] == '#') return yeah;                   // comments is #
-    } else if (find(dashdash.begin(), dashdash.end(), ext) != dashdash.end()) {
+    } else if (here(dashdash, ext)) {
         if (line[0] == '-' && line[1] == '-') return yeah; // comment is --
     } else if (ext == "asm") {
         if (line[0] == ';') return yeah;                   // comment is ';'
@@ -155,24 +164,48 @@ sf::Color cmd_asm(string line, string filename, sf::Color non) {
     while (j < line.size() && (std::isalnum((unsigned char)line[j]) || line[j] == '_')) j++;
     std::string mnemonic = lower(line.substr(i, j - i));
 
-    if (std::find(no_arg_instr.begin(), no_arg_instr.end(), mnemonic) != no_arg_instr.end())
-        return sf::Color(100, 100, 255);
-    
-    if (std::find(spec.begin(), spec.end(), mnemonic) != spec.end())
-        return sf::Color(100, 200, 200);
+    if (here(no_arg_instr, mnemonic))   return sf::Color(100, 100, 255);
 
-    if (std::find(other.begin(), other.end(), mnemonic) != other.end())
-        return sf::Color(50, 255, 50);
-
-    if (std::find(AL.begin(), AL.end(), mnemonic) != AL.end())
-        return sf::Color(200, 0, 255);
+    if (here(spec, mnemonic))           return sf::Color(100, 200, 200);
+    if (here(other, mnemonic))          return sf::Color(50, 255, 50);
+    if (here(AL, mnemonic))              return sf::Color(200, 0, 255);
 
     return non;
 }
 
 bool is_macro(string line, string filename) {
     if (line.empty()) return false;
+
+    static const vector<string> hash = {
+        "c", "cpp", "cxx",
+        "cc","hpp", "cxx",
+        "hh","h"
+    };
+
+    string ext = get_ext(filename);
     line.erase(remove(line.begin(), line.end(), ' '), line.end());
-    if (line[0] == '%' && get_ext(filename) == "asm") return true;
+
+    if (line[0] == '%' && ext == "asm") return true;
+    if (here(hash, ext) && line[0] == '#') return true;
     return false;
+}
+
+sf::Color HL(string line, string filename, sf::Color non) {
+    if (line.empty()) return non;
+
+    sf::Color red = sf::Color(255, 100, 100);
+    sf::Color comment = is_comment(line, filename, non);
+
+    if (comment != non) {
+        return comment;
+    } else {
+        if (get_ext(filename) == "asm") {
+            if (is_label(line, filename)) {return sf::Color(255, 255, 0);}
+            else if (is_macro(line, filename)) {return sf::Color(255, 30, 30);}
+            return cmd_asm(line, filename,  non);
+        }
+        if (is_macro(line, filename)) {return red;}
+        if (here(line, "return")) {return red;}
+    }
+    return non;
 }

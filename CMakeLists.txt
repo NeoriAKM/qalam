@@ -9,7 +9,7 @@ find_package(nlohmann_json REQUIRED)
 
 add_executable(qalam
     src/main.cpp
-    src/saving.cpp
+    src/dialogues.cpp
     src/config.cpp
     src/syntax_hl.cpp
 )

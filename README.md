@@ -1,4 +1,4 @@
-# Qalam - Text editor (v1.2 - HL)
+# Qalam - Text editor (v1.2.1)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
@@ -65,6 +65,16 @@ Standart config:
 - `"font"` - absolute path to your font
 - `"theme"` - `"dark"` or `"light"`
 - `"w_width"` and `"w_height"` - resolution of window. I don't know how to do it dynamic
+
+## Last update
+
+### 1.2.1
+
+- For contributors: You can make button with 1 variable. I made class Button
+
+### 1.2
+
+Syntax highlight
 
 ---
 
