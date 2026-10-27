@@ -132,9 +132,14 @@ int main(int argc, char* argv[]) {
     
     int cursorY = (int)lines.size()-1;
     int cursorX = buflen(cursorY, lines);
-
+    
     int offsetY = 0;
     int offsetX = 0;
+    
+    int first_visible;
+    int last_visible ;
+
+    string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
     const float text_x = 20.f;
@@ -153,8 +158,23 @@ int main(int argc, char* argv[]) {
         save(lines, save_filename);
     });
 
-    int first_visible;
-    int last_visible ;
+    Button cursor_button(font, "???",
+        {20, windowSize.y-60}, {200, 40}, [&]() {
+        cursorY = (last_visible + first_visible) / 2;
+        cursorX = buflen(cursorY, lines);
+    });
+
+    save_button.setColors(
+        sf::Color(40, 160, 40),
+        sf::Color(70, 255, 70),
+        sf::Color(50, 210, 50)
+    );
+
+    cursor_button.setColors(
+        sf::Color(60, 60, 60),
+        sf::Color(100, 100, 100),
+        sf::Color(80, 80, 80)
+    );
 
     ////////////////////// MAINLOOP ///////////////////////////
 
@@ -165,7 +185,12 @@ int main(int argc, char* argv[]) {
             (float)sf::Mouse::getPosition(window).y
         );
 
+        cb_text = "x: " + std::to_string(cursorX) + " | y: " + std::to_string(cursorY);
+
         save_button.update(mousePos);
+        cursor_button.update(mousePos);
+
+        cursor_button.setText(cb_text);
 
         first_visible = std::max(0, (int)(offsetY / line_height));
         last_visible  = std::min((int)lines.size() - 1,
@@ -287,13 +312,17 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // Save button Click
+            //////////////// Buttons ////////////////
+
             if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
                 sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
+
                 if (mouse->button == sf::Mouse::Button::Left) {
                     save_button.handleClick(pos, false);
+                    cursor_button.handleClick(pos, false);
                 } else if (mouse->button == sf::Mouse::Button::Right) {
                     save_button.handleClick(pos, true);
+                    cursor_button.handleClick(pos, true);
                 }
             }
 
@@ -321,7 +350,7 @@ int main(int argc, char* argv[]) {
                     } else {
                         // Vertical
                         offsetY -= (int)(mouse->delta * line_height * 3);
-                        float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 60.f);
+                        float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
                         if (offsetY < 0) offsetY = 0;
                         if (offsetY > max_scroll) offsetY = max_scroll;
                     }
@@ -345,7 +374,6 @@ int main(int argc, char* argv[]) {
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
 
-        // for (int i = 0; i < (int)lines.size(); i++) {
         for (int i = first_visible; i <= last_visible; i++) {
             text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
@@ -354,7 +382,9 @@ int main(int argc, char* argv[]) {
         }
         window.draw(cursor);
         window.draw(save_button);
+        window.draw(cursor_button);
 
         window.display();
     }
+    return 0;
 }

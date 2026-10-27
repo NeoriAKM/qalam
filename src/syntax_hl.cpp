@@ -34,6 +34,15 @@ string get_ext(string filename) {
     return lower(filename.substr(dot + 1));
 }
 
+bool clike(string ext) {
+    static const vector<string> exts = {
+        "c", "h", "cpp", "hpp", "cxx", "hxx",
+        "cc","hh","cppm","ixx",
+    };
+    if (here(exts, ext)) return true;
+    return false;
+}
+
 sf::Color is_comment(string line, string filename, sf::Color non) {
     if (line.empty()) return non;
     line.erase(remove(line.begin(), line.end(), ' '), line.end());
@@ -190,6 +199,38 @@ bool is_macro(string line, string filename) {
     return false;
 }
 
+sf::Color cpphl(string line, string filename, sf::Color non) {
+    static const vector<string> keywords1 = {
+        "int", "float", "double", "char", "void", "bool",
+        "class", "struct", "public", "private", "protected",
+        "new", "delete", "this", "nullptr",
+        "std", "vector", "string", "cout", "cin", "endl"
+    };
+
+    static const vector<string> keywords2 = {
+        "return", "if", "else", "for", "while", "do", "switch", "case"
+    };
+
+    sf::Color yes1 = sf::Color(225, 175, 50);
+    sf::Color yes2 = sf::Color(235, 50, 50);
+
+    if (!clike(get_ext(filename))) return non;
+
+    string word = "";
+    for (char c : line) {
+        if (isalnum(c) || c == '_') {
+            word += c;
+        } else {
+            if (here(keywords1, word)) return yes1;
+            if (here(keywords2, word)) return yes2;
+            word = "";
+        }
+    }
+    if (here(keywords1, word)) return yes1;
+    if (here(keywords2, word)) return yes2;
+    return non;
+}
+
 sf::Color HL(string line, string filename, sf::Color non) {
     if (line.empty()) return non;
 
@@ -204,8 +245,8 @@ sf::Color HL(string line, string filename, sf::Color non) {
             else if (is_macro(line, filename)) {return sf::Color(255, 30, 30);}
             return cmd_asm(line, filename,  non);
         }
+        if (clike(get_ext(filename))) {return cpphl(line, filename, non);}
         if (is_macro(line, filename)) {return red;}
-        if (here(line, "return")) {return red;}
     }
     return non;
 }
