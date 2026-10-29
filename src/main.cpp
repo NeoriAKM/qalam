@@ -12,13 +12,11 @@
 #include <cstring>
 #include <string>
 #include <algorithm>
+#include <optional>
 
 #include "inc/dialogues.hpp"
 #include "inc/config.hpp"
 #include "inc/syntax_hl.hpp"
-
-//#include <cstdlib>
-
 
 /*
 std::vector<std::string> fonts = {
@@ -26,11 +24,11 @@ std::vector<std::string> fonts = {
     "/usr/share/fonts/TTF/DejaVuSansMono.ttf",             // Arch
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", // Debian
     };
-    Coming soon
+    ! Coming soon
 */
 
 
-static size_t buflen(int line, const std::vector<std::string>& lines) {return (size_t)lines[line].size();}
+static size_t buflen(int line, const std::vector<std::string>& lines) {return lines[line].size();}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
@@ -43,30 +41,30 @@ int main(int argc, char* argv[]) {
     bool debug_mode = false;
 
     std::vector<std::string> lines = {};
-    std::string placeholder = "Qalam. Live long and prosper!";
-    std::string save_filename = "unnamed.txt";
+    std::string save_filename = "";
     
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
     
     for (int i=1; i<argc; i++) {
         if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
-            std::cout << "+-------------------- help --------------------------+\n";
+            std::cout << "+-------------------- help msg ----------------------+\n";
             std::cout << "| left  click to button - quick save                 |\n";
             std::cout << "| right click to button - choose path to save        |\n";
             std::cout << "|                                                    |\n";
             std::cout << "|          read about config in README.md            |\n";
             std::cout << "+----------------------------------------------------+\n";
+            std::cout << "| qalam <file>  -  open this file with qalam         |\n";
+            std::cout << "+-------------------- hotkeys -----------------------+\n";
             std::cout << "| Ctrl+S        -  quick save                        |\n";
             std::cout << "| Ctrl+Shift+S  -  save with path choice             |\n";
             std::cout << "| Ctrl+R        -  reload config                     |\n";
             std::cout << "| Ctrl+U        -  moving cursor to center of screen |\n";
-            std::cout << "+----------------------------------------------------+\n";
-            std::cout << "| qalam <file>  -  open this file with qalam         |\n";
-            std::cout << "+----------------------------------------------------+\n";
-            std::cout << "| --help  -h    - opening this reference             |\n";
-            std::cout << "| --debug -d    - turning on debug mode              |\n";
-            std::cout << "+----------------------------------------------------+\n";
+            std::cout << "+---------------------- flags -----------------------+\n";
+            std::cout << "| --help  -h        - opening this reference         |\n";
+            std::cout << "| --debug -d <file> - turning on debug mode          |\n";
+            std::cout << "+----------------------------------------------------+\n\n";
+            std::cout << "Good luck for your future projects with(out) Qalam!\n";
             return 0;
         } else if (std::strcmp(argv[i], "--debug") == 0 || std::strcmp(argv[i], "-d") == 0) {
             debug_mode = true;
@@ -77,18 +75,33 @@ int main(int argc, char* argv[]) {
 
     /////////////// config //////////////////
 
-    std::string font_path = config.font_path;
-    int font_size = config.font_size;
-    std::string theme = config.theme;
+    std::string font_path;
+    int font_size;
+    std::string theme;
 
-    int w_width = std::max(200, config.w_width);
-    int w_height= std::max(200, config.w_height);
+    int w_width;
+    int w_height;
+
+    std::string placeholder;
+    std::string unnamed;
+
+    font_path = config.font_path;
+    font_size = config.font_size;
+    theme = config.theme;
+
+    w_width = std::max(200, config.w_width);
+    w_height= std::max(200, config.w_height);
+
+    placeholder = config.placeholder;
+    unnamed = config.unnamed;
     
     if (debug_mode) {
         std::cout << "Font: "  << font_path << '\n';
         std::cout << "Size: "  << font_size << '\n';
-        std::cout << "Theme: " << theme     << "\n\n";
+        std::cout << "Theme: " << theme     << "\n";
         std::cout << "Window: "<< w_width << 'x' << w_height << '\n';
+        std::cout << "Placeholder: " << placeholder << '\n';
+        std::cout << "Unnamed: " << unnamed << '\n';
     }
 
 
@@ -98,6 +111,10 @@ int main(int argc, char* argv[]) {
     }
 
     ///////////////////////////////////////////////
+
+    if (save_filename == "") {
+        save_filename = unnamed;
+    }
 
     std::ifstream in(save_filename);
 
@@ -128,6 +145,13 @@ int main(int argc, char* argv[]) {
     }
     
     const sf::Glyph& glyph = font.getGlyph('M', font_size, false);
+    const sf::Glyph& glyph_test = font.getGlyph('i', font_size, false);
+
+    if (glyph.advance != glyph_test.advance) {
+        std::cerr << "\nWARNING: Please, can you use mono font? '" <<
+                     font_path << "' is not mono, or not fully mono font\n";
+    }
+
     float charw = glyph.advance;
     
     int cursorY = (int)lines.size()-1;
@@ -139,7 +163,7 @@ int main(int argc, char* argv[]) {
     int first_visible;
     int last_visible ;
 
-    string cb_text = "";
+    std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
     const float text_x = 20.f;
@@ -154,9 +178,10 @@ int main(int argc, char* argv[]) {
     cursor.setFillColor(theme_color1);
 
     Button save_button(font, "save",
-        {windowSize.x-120, windowSize.y-60}, {100, 40}, [&]() {
-        save(lines, save_filename);
-    });
+        {windowSize.x-120, windowSize.y-60}, {100, 40},
+        [&]() {save(lines, save_filename);},
+        [&]() {make_save_window(save_filename, lines);}
+    );
 
     Button cursor_button(font, "???",
         {20, windowSize.y-60}, {200, 40}, [&]() {
@@ -165,18 +190,18 @@ int main(int argc, char* argv[]) {
     });
 
     save_button.setColors(
-        sf::Color(40, 160, 40),
-        sf::Color(70, 255, 70),
-        sf::Color(50, 210, 50)
+        sf::Color(40, 160, 40, 200),
+        sf::Color(70, 255, 70, 200),
+        sf::Color(50, 210, 50, 200)
     );
 
     cursor_button.setColors(
-        sf::Color(60, 60, 60),
-        sf::Color(100, 100, 100),
-        sf::Color(80, 80, 80)
+        sf::Color(60, 60, 60, 200),
+        sf::Color(100, 100, 100, 200),
+        sf::Color(80, 80, 80, 200)
     );
 
-    ////////////////////// MAINLOOP ///////////////////////////
+    /* ! //////////////////// MAINLOOP ///////////////////////// ! */
 
     while (window.isOpen()) {
 
@@ -222,9 +247,14 @@ int main(int argc, char* argv[]) {
                 }
 
                 // ========== Up-Down keys ==========
+                float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
 
                 if (key->code == sf::Keyboard::Key::Down && cursorY < (int)lines.size()-1) {
                     cursorY++;
+
+                    if (cursorY > last_visible)  offsetY += line_height;
+
+                    if (offsetY > max_scroll) offsetY = max_scroll;
                     if (cursorX > buflen(cursorY, lines)) {
                         cursorX = buflen(cursorY, lines);
                     }
@@ -232,6 +262,10 @@ int main(int argc, char* argv[]) {
                 if (key->code==sf::Keyboard::Key::Up) {
                     if (cursorY > 0) {
                         cursorY--;
+
+                        if (cursorY < first_visible) offsetY -= line_height;
+
+                        if (offsetY < 0) offsetY = 0;
                         if (cursorX > buflen(cursorY, lines)) {
                             cursorX = buflen(cursorY, lines);
                         }
@@ -241,6 +275,7 @@ int main(int argc, char* argv[]) {
                 // ========== Delete keys ==========
 
                 if (key->code == sf::Keyboard::Key::Backspace) {
+                    if (lines[cursorY] == placeholder) {lines[cursorY] = ""; cursorX = 0;}
                     if (cursorX > 0) {
                         lines[cursorY].erase(cursorX - 1, 1);
                         cursorX--;
@@ -271,19 +306,19 @@ int main(int argc, char* argv[]) {
                     cursorX=0;
                 }
                 /////////// Ctrl+Something ///////////
-                if (key->code == sf::Keyboard::Key::S && key->control) {
+                if (key->code == sf::Keyboard::Key::S && key->control && !key->shift) { // ctrl+S
                     save(lines, save_filename);
                 }
-                if (key->code == sf::Keyboard::Key::U && key->control) {
+                if (key->code == sf::Keyboard::Key::U && key->control && !key->shift) { // ctrl+U
                     cursorY = (last_visible + first_visible) / 2;
                     cursorX = buflen(cursorY, lines);
                 }
 
-                if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {
+                if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {  // Ctrl+Shift+S
                     make_save_window(save_filename, lines);
                 }
 
-                if (key->code == sf::Keyboard::Key::R && key->control && !key->shift) {
+                if (key->code == sf::Keyboard::Key::R && key->control && !key->shift) { // ctrl+R
                     config.load();
                     font_path = config.font_path;
                     font_size = config.font_size;
@@ -367,6 +402,8 @@ int main(int argc, char* argv[]) {
                     if (offsetX > max_scroll) offsetX = max_scroll;
                 }
             }
+            if (cursorY > last_visible) offsetY++;
+            if (cursorX * charw > windowSize.x + offsetX) offsetX += charw;
         }
 
         cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});

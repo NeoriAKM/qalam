@@ -18,36 +18,31 @@ void save(const vector<string>& list, string filename) {
 }
 
 void handle_save_window_event(
-    const Event& event,
-    RenderWindow& window,
-    string& filename,
-    int& cursorX,
+    const Event& event, RenderWindow& window,
+    string& buffer, int& cursorX,
     const std::vector<string>& lines
-    ) {
-    
+) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         if (key->code == Keyboard::Key::Left && cursorX > 0) cursorX--;
-        if (key->code == Keyboard::Key::Right && cursorX < (int)filename.size()) cursorX++;
-
-        if (key->code == Keyboard::Key::Down) cursorX = 0;
-        if (key->code == Keyboard::Key::Up)   cursorX = (int)filename.size();
+        if (key->code == Keyboard::Key::Right && cursorX < (int)buffer.size()) cursorX++;
 
         if (key->code == Keyboard::Key::Backspace && cursorX > 0) {
-            filename.erase(cursorX - 1, 1);
+            buffer.erase(cursorX - 1, 1);
             cursorX--;
         }
-        if (key->code == Keyboard::Key::Delete && cursorX < (int)filename.size()) {
-            filename.erase(cursorX, 1);
+        if (key->code == Keyboard::Key::Delete && cursorX < (int)buffer.size()) {
+            buffer.erase(cursorX, 1);
         }
         if (key->code == Keyboard::Key::Enter) {
-            save(lines, filename);
+            save(lines, buffer);
             window.close();
         }
+        if (key->code == Keyboard::Key::Escape) window.close();
     }
 
     if (const auto* t = event.getIf<sf::Event::TextEntered>()) {
         if (t->unicode >= 32 && t->unicode < 127) {
-            filename.insert(cursorX, 1, static_cast<char>(t->unicode));
+            buffer.insert(cursorX, 1, static_cast<char>(t->unicode));
             cursorX++;
         }
     }
@@ -57,6 +52,10 @@ void handle_save_window_event(
 
 void make_save_window(string& save_filename, const vector<string>& lines) {
     Config config;
+    config.load();
+
+    string buffer = save_filename;
+    
     Vector2f windowSize(500.f, 100.f);
 
     RenderWindow window(VideoMode(
@@ -75,11 +74,11 @@ void make_save_window(string& save_filename, const vector<string>& lines) {
     const Glyph& glyph = font.getGlyph('M', charsize, false);
     float charw = glyph.advance;
     
-    int cursorX = (int)save_filename.size();
+    int cursorX = (int)buffer.size();
 
     const float line_height = font.getLineSpacing(charsize);
 
-    Text text(font, save_filename, charsize);
+    Text text(font, buffer, charsize);
     RectangleShape cursor({2.f, line_height});
 
     cursor.setFillColor(Color::White);
@@ -88,9 +87,9 @@ void make_save_window(string& save_filename, const vector<string>& lines) {
     while (window.isOpen()) {
         while (const optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) window.close();
-            handle_save_window_event(*event, window, save_filename, cursorX, lines);
+            handle_save_window_event(*event, window, buffer, cursorX, lines);
         }
-        text.setString(save_filename);
+        text.setString(buffer);
         cursor.setPosition({10.f + cursorX * charw, 5.f});
         window.clear(sf::Color(30, 30, 30));
 
@@ -123,7 +122,9 @@ Button::Button(Font& f, const string& label, Vector2f pos,
 }
 
 sf::FloatRect Button::getGlobalBounds() const {return bg.getGlobalBounds();}
+
 void Button::setColor(const sf::Color& color) {bg.setFillColor(color);}
+void Button::setFgColor(const sf::Color& color) {text.setFillColor(color);}
 
 void Button::setText(const string& newText) {
     text.setString(newText);
@@ -146,11 +147,14 @@ void Button::draw(RenderTarget& target, RenderStates states) const {
 }
 
 void Button::update(sf::Vector2f mousePos) {
-    if (bg.getGlobalBounds().contains(mousePos)) {
+    if (timer > 0) {
+        bg.setFillColor(activeColor);
+    } else if (bg.getGlobalBounds().contains(mousePos)) {
         bg.setFillColor(hoverColor);
     } else {
         bg.setFillColor(normalColor);
     }
+    timer = std::max(timer-1, 0);
 }
 
 void Button::handleClick(sf::Vector2f mousePos, bool rightClick) {
@@ -161,6 +165,8 @@ void Button::handleClick(sf::Vector2f mousePos, bool rightClick) {
     } else {
         if (onClick) onClick();
     }
+
+    timer = 20;
     
     bg.setFillColor(activeColor);
 }

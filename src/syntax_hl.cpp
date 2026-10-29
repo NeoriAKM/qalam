@@ -8,8 +8,6 @@
 
 #include <SFML/Graphics/Color.hpp>
 
-using namespace std;
-
 bool here(const std::string& str, const std::string& val) {
     return str.find(val) != std::string::npos;
 }
@@ -19,23 +17,23 @@ bool here(const Container& cont, const std::string& val) {
     return std::find(cont.begin(), cont.end(), val) != cont.end();
 }
 
-static string lower(string str) {
+static std::string lower(std::string str) {
     transform(str.begin(), str.end(), str.begin(), [](unsigned char chr){ return std::tolower(chr); });
     return str;
 }
 
-string get_ext(string filename) {
+std::string get_ext(std::string filename) {
     size_t slash = filename.find_last_of("/\\");
-    if (slash != string::npos) filename = filename.substr(slash + 1);
+    if (slash != std::string::npos) filename = filename.substr(slash + 1);
 
     size_t dot = filename.rfind('.');
-    if (dot == string::npos || dot == filename.size() - 1) return "";
+    if (dot == std::string::npos || dot == filename.size() - 1) return "";
 
     return lower(filename.substr(dot + 1));
 }
 
-bool clike(string ext) {
-    static const vector<string> exts = {
+bool clike(std::string ext) {
+    static const std::vector<std::string> exts = {
         "c", "h", "cpp", "hpp", "cxx", "hxx",
         "cc","hh","cppm","ixx",
     };
@@ -43,13 +41,13 @@ bool clike(string ext) {
     return false;
 }
 
-sf::Color is_comment(string line, string filename, sf::Color non) {
+sf::Color is_comment(std::string line, std::string filename, sf::Color non) {
     if (line.empty()) return non;
     line.erase(remove(line.begin(), line.end(), ' '), line.end());
     if (line.empty()) return non;
 
     sf::Color yeah = {120, 120, 120};
-    static const vector<string> slashslash = {
+    static const std::vector<std::string> slashslash = {
         // C-family
         "c", "h",
         "cpp", "hpp", "cxx", "hxx", "cc", "hh", "cppm", "ixx",
@@ -65,7 +63,7 @@ sf::Color is_comment(string line, string filename, sf::Color non) {
         "pas", "pp", "sol", "glsl", "hlsl", "vert", "frag",
         "cu", "cuh", "cl"
     };
-    static const vector<string> hash = {
+    static const std::vector<std::string> hash = {
         // Python
         "py", "pyw", "pyi",
         // Ruby
@@ -80,20 +78,20 @@ sf::Color is_comment(string line, string filename, sf::Color non) {
         "tcl", "awk", "sed", "cmake", "dockerfile",
         "gitignore", "gitattributes", "gitmodules"
     };
-    static const vector<string> dashdash = {
+    static const std::vector<std::string> dashdash = {
         "lua",  "hs",   "lhs",
         "sql",  "adb",  "ads",
         "vhd",  "vhdl", "elm",
         "m",    "applescript",
         "purs","idr", "agda"
     };
-    static const vector<string> bang = {
+    static const std::vector<std::string> bang = {
         "f",   "for", "f77",
         "f90", "f95", "f03",
         "f08", "ftn"
     };
 
-    string ext = get_ext(filename);
+    std::string ext = get_ext(filename);
 
     if (here(slashslash, ext)) {
         if (line[0] == '/' && line[1] == '/') return yeah; // comment is //
@@ -107,16 +105,16 @@ sf::Color is_comment(string line, string filename, sf::Color non) {
     return non;
 }
 
-bool is_label(string line, string filename) { // Labels HL for assembler
+bool is_label(std::string line, std::string filename) { // Labels HL for assembler
     if (line.empty()) return false;
     if (line.back() == ':' && get_ext(filename) == "asm") return true;
     return false;
 }
 
-sf::Color cmd_asm(string line, string filename, sf::Color non) {
+sf::Color cmd_asm(std::string line, std::string filename, sf::Color non) {
     if (line.empty() || get_ext(filename) != "asm") return non;
 
-    static const vector<string> no_arg_instr = {
+    static const std::vector<std::string> no_arg_instr = {
         "nop", "hlt", "pause", "leave", "retn", "retf",
         "iret", "iretd", "iretq", "sysret", "sysexit",
         "cpuid", "rdtsc", "rdtscp", "rdpmc",
@@ -150,20 +148,20 @@ sf::Color cmd_asm(string line, string filename, sf::Color non) {
         "emms", "vzeroupper", "vzeroall"
     };
 
-    static const vector<string> spec = {
+    static const std::vector<std::string> spec = {
         "push",  "pop",  "inc",  "dec",
         "section","jmp", "je",   "jne",
         "jc",    "jnc",  "jz",  "jnz",
         "call", 
     };
 
-    static const vector<string> AL = {
+    static const std::vector<std::string> AL = {
         "or", "xor", "and", "not",
         "add", "sub", "mul", "div",
         "test"
     };
 
-    static const vector<string> other = {
+    static const std::vector<std::string> other = {
         "ret", "int"
     };
 
@@ -182,32 +180,33 @@ sf::Color cmd_asm(string line, string filename, sf::Color non) {
     return non;
 }
 
-bool is_macro(string line, string filename) {
+bool is_macro(std::string line, std::string filename) {
     if (line.empty()) return false;
 
-    static const vector<string> hash = {
+    static const std::vector<std::string> hash = {
         "c", "cpp", "cxx",
         "cc","hpp", "cxx",
         "hh","h"
     };
 
-    string ext = get_ext(filename);
+    std::string ext = get_ext(filename);
     line.erase(remove(line.begin(), line.end(), ' '), line.end());
+    if (line.empty()) return false;
 
     if (line[0] == '%' && ext == "asm") return true;
     if (here(hash, ext) && line[0] == '#') return true;
     return false;
 }
 
-sf::Color cpphl(string line, string filename, sf::Color non) {
-    static const vector<string> keywords1 = {
+sf::Color cpphl(std::string line, std::string filename, sf::Color non) {
+    static const std::vector<std::string> keywords1 = {
         "int", "float", "double", "char", "void", "bool",
         "class", "struct", "public", "private", "protected",
         "new", "delete", "this", "nullptr",
         "std", "vector", "string", "cout", "cin", "endl"
     };
 
-    static const vector<string> keywords2 = {
+    static const std::vector<std::string> keywords2 = {
         "return", "if", "else", "for", "while", "do", "switch", "case"
     };
 
@@ -216,7 +215,7 @@ sf::Color cpphl(string line, string filename, sf::Color non) {
 
     if (!clike(get_ext(filename))) return non;
 
-    string word = "";
+    std::string word = "";
     for (char c : line) {
         if (isalnum(c) || c == '_') {
             word += c;
@@ -231,10 +230,12 @@ sf::Color cpphl(string line, string filename, sf::Color non) {
     return non;
 }
 
-sf::Color HL(string line, string filename, sf::Color non) {
+///////////////////////////////////////////////////////////////////////////////////
+
+sf::Color HL(std::string line, std::string filename, sf::Color non) {
     if (line.empty()) return non;
 
-    sf::Color red = sf::Color(255, 100, 100);
+    sf::Color macroclr = sf::Color(100, 255, 100);
     sf::Color comment = is_comment(line, filename, non);
 
     if (comment != non) {
@@ -245,8 +246,11 @@ sf::Color HL(string line, string filename, sf::Color non) {
             else if (is_macro(line, filename)) {return sf::Color(255, 30, 30);}
             return cmd_asm(line, filename,  non);
         }
-        if (clike(get_ext(filename))) {return cpphl(line, filename, non);}
-        if (is_macro(line, filename)) {return red;}
+        if (clike(get_ext(filename))) {
+            if (is_macro(line, filename)) {return macroclr;}
+            return cpphl(line, filename, non);
+        }
+        if (is_macro(line, filename)) {return macroclr;}
     }
     return non;
 }

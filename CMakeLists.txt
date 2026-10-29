@@ -13,6 +13,7 @@ add_executable(qalam
     src/config.cpp
     src/syntax_hl.cpp
 )
+
 target_link_libraries(qalam PRIVATE
     SFML::Graphics
     SFML::Window

@@ -4,11 +4,9 @@
 #include <SFML/Graphics/Drawable.hpp>
 #include <string>
 #include <vector>
+#include <functional>
 
-using namespace sf;
-using namespace std;
-
-void save(const vector<string>& list, string filename);
+void save(const std::vector<std::string>& list, std::string filename);
 
 void handle_save_window_event(
     const sf::Event& event, sf::RenderWindow& window,
@@ -18,31 +16,34 @@ void handle_save_window_event(
 
 void make_save_window(std::string& save_filename, const std::vector<std::string>& lines);
 
-class Button : public Drawable {
+class Button : public sf::Drawable {
 private:
-    RectangleShape bg;
-    Text text;
-    Font& font;
+    sf::RectangleShape bg;
+    sf::Text text;
+    sf::Font& font;
 
-    function<void()> onClick;
-    function<void()> onRightClick;
+    std::function<void()> onClick;
+    std::function<void()> onRightClick;
     
-    Color normalColor = Color(50, 50, 50);
-    Color hoverColor = Color(80, 80, 80);
-    Color activeColor = Color::Cyan;
+    sf::Color normalColor = sf::Color(50, 50, 50);
+    sf::Color hoverColor =  sf::Color(80, 80, 80);
+    sf::Color activeColor = sf::Color::Cyan;
+
+    int timer = 0;
 
 protected:
-    void draw(RenderTarget& target, RenderStates states) const override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 public:
-    Button(Font& f, const string& label, Vector2f pos, Vector2f size, 
-           function<void()> action = nullptr, function<void()> action2 = nullptr);
+    Button(sf::Font& f, const std::string& label, sf::Vector2f pos, sf::Vector2f size, 
+           std::function<void()> action = nullptr, std::function<void()> action2 = nullptr);
 
-    void handleClick(Vector2f mousePos, bool rightClick);
-    void update(Vector2f mousePos);
-    void setText(const string& newText);
+    void handleClick(sf::Vector2f mousePos, bool rightClick);
+    void update(sf::Vector2f mousePos);
+    void setText(const std::string& newText);
     
-    FloatRect getGlobalBounds() const;
-    void setColor(const Color& color);
-    void setColors(const Color& normal, const Color& click, const Color& hover);
+    sf::FloatRect getGlobalBounds() const;
+    void setColor(const sf::Color& color);
+    void setFgColor(const sf::Color& color);
+    void setColors(const sf::Color& normal, const sf::Color& click, const sf::Color& hover);
 };

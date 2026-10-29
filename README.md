@@ -1,10 +1,8 @@
-# Qalam - Text editor (v1.2.1)
+# Qalam - Text editor (v1.2.2)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
 The name comes from the Arabic word قلم (qalam), meaning "pen".
-
-![](img/img1.png)
 
 ## Features
 - Basic work with lines, like any other text editor
@@ -56,17 +54,30 @@ Standart config:
     "font": "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
     "font_size": 20,
     "theme": "dark",
+
     "w_width": 1000,
-    "w_height": 600
+    "w_height": 600,
+
+    "placeholder": "Qalam. Live long and prosper!",
+    "unnamed": "unnamed.txt"
 }
 ```
 
-- `"font_size"` - any int-typed value. `/usr/share/fonts/TTF/DejaVuSansMono.ttf` - path only for Arch linux
-- `"font"` - absolute path to your font
-- `"theme"` - `"dark"` or `"light"`
-- `"w_width"` and `"w_height"` - resolution of window. I don't know how to do it dynamic
+- `font_size` - any int-typed value.
+- `font` - absolute path to your font. `/usr/share/fonts/TTF/DejaVuSansMono.ttf` - path only for Arch linux
+- `theme` - `"dark"` or `"light"`
+
+- `w_width` and `w_height` - resolution of window. I don't know how to do it dynamic
+
+- `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file.
 
 ## Last update
+
+### 1.2.2
+
+- added "unnamed" & "placeholder" parameters to config.
+
+- fixed few bugs in `dialogues.cpp`
 
 ### 1.2.1
 
@@ -76,6 +87,15 @@ Standart config:
 
 Syntax highlight
 
+## Gallery
+
+![](img/img1.png)
+
+![](img/img2.png)
+
+![](img/img3.png)
+
+---
 ---
 
 Copyright NeoriAKM(c) | made with **love** and **C++**
