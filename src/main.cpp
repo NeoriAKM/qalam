@@ -1,4 +1,4 @@
-// Qalam - Text editor v1.2.1
+// Qalam - Text editor v1.3
 // Copyright NeoriAKM(c)
 
 #include <SFML/Window/Keyboard.hpp>
@@ -27,6 +27,14 @@ std::vector<std::string> fonts = {
     ! Coming soon
 */
 
+std::string repeat(const std::string& str, int times) {
+    std::string result;
+    result.reserve(str.length() * times);
+    for (int i = 0; i < times; ++i) {
+        result += str;
+    }
+    return result;
+}
 
 static size_t buflen(int line, const std::vector<std::string>& lines) {return lines[line].size();}
 
@@ -58,7 +66,6 @@ int main(int argc, char* argv[]) {
             std::cout << "+-------------------- hotkeys -----------------------+\n";
             std::cout << "| Ctrl+S        -  quick save                        |\n";
             std::cout << "| Ctrl+Shift+S  -  save with path choice             |\n";
-            std::cout << "| Ctrl+R        -  reload config                     |\n";
             std::cout << "| Ctrl+U        -  moving cursor to center of screen |\n";
             std::cout << "+---------------------- flags -----------------------+\n";
             std::cout << "| --help  -h        - opening this reference         |\n";
@@ -163,18 +170,24 @@ int main(int argc, char* argv[]) {
     int first_visible;
     int last_visible ;
 
+    std::string gaps = "";
+    int gaps_modifier = 0;
+
     std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
     const float text_x = 20.f;
     const float text_y = 20.f;
 
-    sf::Text text(font, lines[cursorY], font_size);
+    sf::Text    text(font, lines[cursorY], font_size);
+    sf::Text strnums(font, "",             font_size);
     sf::RectangleShape cursor({2.f, line_height});
 
     text.setPosition({20.f, 0.f});
+    strnums.setPosition({20.f, 0.f});
     
     text.setFillColor(theme_color1);
+    strnums.setFillColor(theme_color1);
     cursor.setFillColor(theme_color1);
 
     Button save_button(font, "save",
@@ -189,6 +202,11 @@ int main(int argc, char* argv[]) {
         cursorX = buflen(cursorY, lines);
     });
 
+    Button strings_button(
+        font, std::to_string((int)lines.size()),
+        {240, windowSize.y-60}, {100, 40}, [&]() {}
+    );
+
     save_button.setColors(
         sf::Color(40, 160, 40, 200),
         sf::Color(70, 255, 70, 200),
@@ -199,6 +217,12 @@ int main(int argc, char* argv[]) {
         sf::Color(60, 60, 60, 200),
         sf::Color(100, 100, 100, 200),
         sf::Color(80, 80, 80, 200)
+    );
+
+    strings_button.setColors(
+        sf::Color(175, 175, 100, 200),
+        sf::Color(255, 255, 150, 200),
+        sf::Color(210, 210, 120, 200)
     );
 
     /* ! //////////////////// MAINLOOP ///////////////////////// ! */
@@ -214,8 +238,10 @@ int main(int argc, char* argv[]) {
 
         save_button.update(mousePos);
         cursor_button.update(mousePos);
+        strings_button.update(mousePos);
 
         cursor_button.setText(cb_text);
+        strings_button.setText(std::to_string((int)lines.size()));
 
         first_visible = std::max(0, (int)(offsetY / line_height));
         last_visible  = std::min((int)lines.size() - 1,
@@ -275,6 +301,15 @@ int main(int argc, char* argv[]) {
                 // ========== Delete keys ==========
 
                 if (key->code == sf::Keyboard::Key::Backspace) {
+                    if (key->control) {
+                        while (cursorX > 0 && lines[cursorY][cursorX - 1] == ' ') cursorX--;
+                        while (cursorX > 0 && lines[cursorY][cursorX - 1] != ' ') {
+                            lines[cursorY].erase(cursorX - 1, 1);
+                            cursorX--;
+                        }
+                        continue;
+                    }
+                    // simple backspace
                     if (lines[cursorY] == placeholder) {lines[cursorY] = ""; cursorX = 0;}
                     if (cursorX > 0) {
                         lines[cursorY].erase(cursorX - 1, 1);
@@ -285,6 +320,21 @@ int main(int argc, char* argv[]) {
                         lines.erase(lines.begin() + cursorY);
                         cursorY--;
                         cursorX = old_len;
+
+                        if (cursorY < 0) cursorY = 0;
+                        if (cursorY >= (int)lines.size()) cursorY = (int)lines.size() - 1;
+                        if (cursorX < 0) cursorX = 0;
+                        if (cursorX > (int)buflen(cursorY, lines)) cursorX = buflen(cursorY, lines);
+
+                        float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
+                        if (offsetY > max_scroll) offsetY = (int)max_scroll;
+                        if (offsetY < 0) offsetY = 0;
+
+                        first_visible = std::max(0, (int)(offsetY / line_height));
+                        last_visible  = std::min(
+                            (int)lines.size() - 1,
+                            (int)((offsetY + windowSize.y) / line_height) + 1
+                        );
                     }
                 }
                 if (key->code == sf::Keyboard::Key::Delete && cursorX < buflen(cursorY, lines)) {
@@ -317,27 +367,6 @@ int main(int argc, char* argv[]) {
                 if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {  // Ctrl+Shift+S
                     make_save_window(save_filename, lines);
                 }
-
-                if (key->code == sf::Keyboard::Key::R && key->control && !key->shift) { // ctrl+R
-                    config.load();
-                    font_path = config.font_path;
-                    font_size = config.font_size;
-                    theme     = config.theme;
-
-                    w_width = config.w_width;
-                    w_height= config.w_height;
-
-                    if (theme == "light") {
-                        theme_color1 = sf::Color(50, 50, 50);
-                        theme_color2 = sf::Color::White;
-                    } else if (theme == "dark") {
-                        theme_color1 = sf::Color::White;
-                        theme_color2 = sf::Color::Black;
-                    }
-
-                    text.setFillColor(theme_color1);
-                    cursor.setFillColor(theme_color1);
-                }
             }
 
             if (const auto* t = event->getIf<sf::Event::TextEntered>()) {
@@ -361,17 +390,22 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            /*
-                MOUSE SCROLL PART
-            */
+            /* ? MOUSE SCROLL PART ¿ */
+
             if (const auto* mouse = event->getIf<sf::Event::MouseWheelScrolled>()) {
     
                 bool shift_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || 
                                      sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
+                
+                bool ctrl_pressed  = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) || 
+                                     sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
+                
+                int mod = 1;
+                if (ctrl_pressed) mod = 2;
 
                 if (mouse->wheel == sf::Mouse::Wheel::Vertical) {
                     if (shift_pressed) {
-                        offsetX -= (int)(mouse->delta * charw * 5);
+                        offsetX -= (int)(mouse->delta * charw * 5 * mod);
 
                         int max_line_length = 0;
                         for(const auto&line:lines) {
@@ -384,15 +418,15 @@ int main(int argc, char* argv[]) {
 
                     } else {
                         // Vertical
-                        offsetY -= (int)(mouse->delta * line_height * 3);
+                        offsetY -= (int)(mouse->delta * line_height * 3 * mod);
                         float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
                         if (offsetY < 0) offsetY = 0;
                         if (offsetY > max_scroll) offsetY = max_scroll;
                     }
                 } 
-                // Horizontal toychpad
+                // Horizontal touchpad
                 else if (mouse->wheel == sf::Mouse::Wheel::Horizontal) {
-                    offsetX -= (int)(mouse->delta * charw * 5);
+                    offsetX -= (int)(mouse->delta * charw * 5 * mod);
 
                     int max_line_length = 0;
                     for(const auto&line:lines)if((int)line.size()>max_line_length)max_line_length=line.size();
@@ -402,24 +436,43 @@ int main(int argc, char* argv[]) {
                     if (offsetX > max_scroll) offsetX = max_scroll;
                 }
             }
-            if (cursorY > last_visible) offsetY++;
+            // if (cursorY > last_visible) offsetY++;
             if (cursorX * charw > windowSize.x + offsetX) offsetX += charw;
         }
 
-        cursor.setPosition({text_x + cursorX * charw - offsetX, text_y + cursorY * line_height - offsetY});
+        int cursor_gaps = (int)std::to_string((int)lines.size()).size() + 1;
+
+        cursor.setPosition({
+            text_x + cursorX * charw - offsetX + (cursor_gaps * charw),
+            text_y + cursorY * line_height - offsetY
+        });
 
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
 
         for (int i = first_visible; i <= last_visible; i++) {
+            gaps_modifier = ( // int
+                (int)std::to_string((int)lines.size()).size() - (int)std::to_string(i+1).size()
+            );
+
             text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
-            text.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
+            text.setPosition({
+                text_x - offsetX + (charw * ((int)std::to_string((int)lines.size()).size()+1)),
+                text_y + i * line_height - offsetY
+            });
+            
+            strnums.setString(repeat(" ", gaps_modifier) + std::to_string(i+1) + ' ');
+            strnums.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
+
             window.draw(text);
+            window.draw(strnums);
         }
+
         window.draw(cursor);
         window.draw(save_button);
         window.draw(cursor_button);
+        window.draw(strings_button);
 
         window.display();
     }

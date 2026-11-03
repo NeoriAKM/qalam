@@ -35,7 +35,8 @@ cmake --build build
 ## Hotkeys
 
 - Ctrl+S and Ctrl+Shift+S : classic
-- Ctrl+R : updates config.
+- Ctrl+U : moving cursor to center of screen
+- Ctrl+Scroll : scrolling 2x faster
 
 ## Flags
 
@@ -72,6 +73,12 @@ Standart config:
 - `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file.
 
 ## Last update
+
+### 1.3
+
+- Added strings counter
+- Added 2x modifier to scroll with pressed control
+- Added
 
 ### 1.2.2
 
