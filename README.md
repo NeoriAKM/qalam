@@ -76,9 +76,13 @@ Standart config:
 
 ### 1.3
 
-- Added strings counter
+- Added string indexes lefter from text
+
 - Added 2x modifier to scroll with pressed control
-- Added
+
+- Added label thats showing strings count
+
+- Fixed bug, thats going segfault if you press backspace on empty last line. Now thats okay
 
 ### 1.2.2
 
