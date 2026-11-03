@@ -1,4 +1,4 @@
-# Qalam - Text editor (v1.2.2)
+# Qalam - Text editor (v1.3)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
