@@ -14,8 +14,8 @@ add_executable(qalam
     src/syntax_hl.cpp
 )
 
-target_compile_options(qalam PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)
-target_link_options(qalam PRIVATE -fsanitize=address)
+# target_compile_options(qalam PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)
+# target_link_options(qalam PRIVATE -fsanitize=address)
 
 target_link_libraries(qalam PRIVATE
     SFML::Graphics
