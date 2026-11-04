@@ -165,6 +165,8 @@ int main(int argc, char* argv[]) {
     }
 
     float charw = glyph.advance;
+
+    float gaps = charw * (std::to_string((int)lines.size()).size() + 1);
     
     int cursorY = (int)lines.size()-1;
     int cursorX = buflen(cursorY, lines);
@@ -177,9 +179,6 @@ int main(int argc, char* argv[]) {
     int first_visible;
     int last_visible ;
 
-    std::string gaps = "";
-    int gaps_modifier = 0;
-
     std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
@@ -189,13 +188,17 @@ int main(int argc, char* argv[]) {
     sf::Text    text(font, lines[cursorY], font_size);
     sf::Text strnums(font, "",             font_size);
     sf::RectangleShape cursor({2.f, line_height});
+    sf::RectangleShape numsbg({gaps + (charw/2), windowSize.y}); 
+
 
     text.setPosition({20.f, 0.f});
     strnums.setPosition({20.f, 0.f});
+    numsbg.setPosition({0.f, 0.f});
     
     text.setFillColor(theme_color1);
     strnums.setFillColor(theme_color1);
     cursor.setFillColor(theme_color1);
+    numsbg.setFillColor(sf::Color(50, 50, 50, 230));
 
     Button save_button(font, "save",
         {windowSize.x-120, windowSize.y-60}, {100, 40},
@@ -450,29 +453,28 @@ int main(int argc, char* argv[]) {
         }
 
         int cursor_gaps = (int)std::to_string((int)lines.size()).size() + 1;
+        gaps = charw * (std::to_string((int)lines.size()).size() + 1);
 
         cursor.setPosition({
-            text_x + cursorX * charw - offsetX + (cursor_gaps * charw),
+            text_x + cursorX * charw + gaps - offsetX,
             text_y + cursorY * line_height - offsetY
         });
 
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
 
+        window.draw(numsbg);
+
         for (int i = first_visible; i <= last_visible; i++) {
-            gaps_modifier = ( // int
-                (int)std::to_string((int)lines.size()).size() - (int)std::to_string(i+1).size()
-            );
 
             text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
-            text.setPosition({
-                text_x - offsetX + (charw * ((int)std::to_string((int)lines.size()).size()+1)),
-                text_y + i * line_height - offsetY
-            });
+            text.setPosition({text_x + gaps - offsetX, text_y + i * line_height - offsetY});
             
-            strnums.setString(repeat(" ", gaps_modifier) + std::to_string(i+1) + ' ');
-            strnums.setPosition({text_x - offsetX, text_y + i * line_height - offsetY});
+            strnums.setString(std::to_string(i+1));
+            sf::FloatRect bounds = strnums.getLocalBounds();
+            strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 2), 0.f});
+            strnums.setPosition({text_x + gaps - offsetX, text_y + i * line_height - offsetY});
 
             window.draw(text);
             window.draw(strnums);

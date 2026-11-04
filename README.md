@@ -1,3 +1,8 @@
+![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
+![SFML](https://img.shields.io/badge/SFML-3.1-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Last commit](https://img.shields.io/github/last-commit/NeoriAKM/qalam?color=red)
+
 # Qalam - Text editor (v1.3.1)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
