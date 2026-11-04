@@ -1,4 +1,4 @@
-# Qalam - Text editor (v1.3)
+# Qalam - Text editor (v1.3.1)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
@@ -55,6 +55,7 @@ Standart config:
     "font": "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
     "font_size": 20,
     "theme": "dark",
+    "fps": 60,
 
     "w_width": 1000,
     "w_height": 600,
@@ -74,7 +75,7 @@ Standart config:
 
 ## Last update
 
-### 1.3
+### 1.3.x
 
 - Added string indexes lefter from text
 

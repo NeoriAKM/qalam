@@ -1,4 +1,4 @@
-// Qalam - Text editor v1.3
+// Qalam - Text editor v1.3.1
 // Copyright NeoriAKM(c)
 
 #include <SFML/Window/Keyboard.hpp>
@@ -26,6 +26,8 @@ std::vector<std::string> fonts = {
     };
     ! Coming soon
 */
+
+
 
 std::string repeat(const std::string& str, int times) {
     std::string result;
@@ -84,6 +86,7 @@ int main(int argc, char* argv[]) {
 
     std::string font_path;
     int font_size;
+    int fps;
     std::string theme;
 
     int w_width;
@@ -95,6 +98,7 @@ int main(int argc, char* argv[]) {
     font_path = config.font_path;
     font_size = config.font_size;
     theme = config.theme;
+    fps = config.fps;
 
     w_width = std::max(200, config.w_width);
     w_height= std::max(200, config.w_height);
@@ -109,6 +113,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Window: "<< w_width << 'x' << w_height << '\n';
         std::cout << "Placeholder: " << placeholder << '\n';
         std::cout << "Unnamed: " << unnamed << '\n';
+        std::cout << "FPS: " << fps << '\n';
     }
 
 
@@ -143,7 +148,7 @@ int main(int argc, char* argv[]) {
         sf::String("Qalam: '") + sf::String(save_filename) + "'"
     );
 
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(fps);
 
     sf::Font font;
     if (!font.openFromFile(font_path)) {
@@ -163,6 +168,8 @@ int main(int argc, char* argv[]) {
     
     int cursorY = (int)lines.size()-1;
     int cursorX = buflen(cursorY, lines);
+
+    int tick = 0;                     
     
     int offsetY = 0;
     int offsetX = 0;
@@ -228,6 +235,8 @@ int main(int argc, char* argv[]) {
     /* ! //////////////////// MAINLOOP ///////////////////////// ! */
 
     while (window.isOpen()) {
+
+        tick++;
 
         sf::Vector2f mousePos(
             (float)sf::Mouse::getPosition(window).x, 
@@ -468,8 +477,10 @@ int main(int argc, char* argv[]) {
             window.draw(text);
             window.draw(strnums);
         }
+        
+        if (tick < fps/2) window.draw(cursor);
+        else if (tick > fps-1) tick = 0;        
 
-        window.draw(cursor);
         window.draw(save_button);
         window.draw(cursor_button);
         window.draw(strings_button);

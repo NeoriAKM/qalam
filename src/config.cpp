@@ -23,6 +23,7 @@ void Config::load() {
         font_path = config_json.value("font", font_path);
         font_size = config_json.value("font_size", font_size);
         theme = config_json.value("theme", theme);
+        fps = config_json.value("fps", fps);
 
         w_width  = config_json.value("w_width" , w_width);
         w_height = config_json.value("w_height", w_height);
