@@ -167,6 +167,7 @@ int main(int argc, char* argv[]) {
     float charw = glyph.advance;
 
     float gaps = charw * (std::to_string((int)lines.size()).size() + 1);
+    float old_gaps;
     
     int cursorY = (int)lines.size()-1;
     int cursorX = buflen(cursorY, lines);
@@ -198,7 +199,7 @@ int main(int argc, char* argv[]) {
     text.setFillColor(theme_color1);
     strnums.setFillColor(theme_color1);
     cursor.setFillColor(theme_color1);
-    numsbg.setFillColor(sf::Color(50, 50, 50, 230));
+    numsbg.setFillColor(sf::Color(40, 40, 40, 220));
 
     Button save_button(font, "save",
         {windowSize.x-120, windowSize.y-60}, {100, 40},
@@ -251,10 +252,11 @@ int main(int argc, char* argv[]) {
         save_button.update(mousePos);
         cursor_button.update(mousePos);
         strings_button.update(mousePos);
+        
+        if (old_gaps != gaps) numsbg.setSize({gaps + (charw/2), windowSize.y});
 
         cursor_button.setText(cb_text);
         strings_button.setText(std::to_string((int)lines.size()));
-
         first_visible = std::max(0, (int)(offsetY / line_height));
         last_visible  = std::min((int)lines.size() - 1,
                                  (int)((offsetY + windowSize.y) / line_height) + 1);
@@ -363,9 +365,13 @@ int main(int argc, char* argv[]) {
                 if (key->code == sf::Keyboard::Key::Enter) {
                     std::string rest = lines[cursorY].substr(cursorX);
                     lines[cursorY].erase(cursorX);
-                    lines.insert(lines.begin() + cursorY + 1, rest);
+
+                    int indent = 0;
+                    while (indent < lines[cursorY].size() && lines[cursorY][indent] == ' ') indent++;
+
+                    lines.insert(lines.begin() + cursorY + 1, (std::string(indent, ' ') + rest));
                     cursorY++;
-                    cursorX=0;
+                    cursorX = indent;
                 }
                 /////////// Ctrl+Something ///////////
                 if (key->code == sf::Keyboard::Key::S && key->control && !key->shift) { // ctrl+S
@@ -383,7 +389,13 @@ int main(int argc, char* argv[]) {
 
             if (const auto* t = event->getIf<sf::Event::TextEntered>()) {
                 if (t->unicode >= 32 && t->unicode < 127) {
-                    lines[cursorY].insert(cursorX, 1, static_cast<char>(t->unicode));
+                    char typed = static_cast<char>(t->unicode);
+
+                    if      (typed == '(') {lines[cursorY].insert(cursorX, "()");}
+                    else if (typed == '[') {lines[cursorY].insert(cursorX, "[]");}
+                    else if (typed == '{') {lines[cursorY].insert(cursorX, "{}");}
+                    else if (typed == '"') {lines[cursorY].insert(cursorX, "\"\"");}
+                    else                   {lines[cursorY].insert(cursorX, 1, typed);}
                     cursorX++;
                 }
             }
@@ -474,7 +486,7 @@ int main(int argc, char* argv[]) {
             strnums.setString(std::to_string(i+1));
             sf::FloatRect bounds = strnums.getLocalBounds();
             strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 2), 0.f});
-            strnums.setPosition({text_x + gaps - offsetX, text_y + i * line_height - offsetY});
+            strnums.setPosition({text_x + gaps /*- offsetX*/, text_y + i * line_height - offsetY});
 
             window.draw(text);
             window.draw(strnums);
@@ -488,6 +500,8 @@ int main(int argc, char* argv[]) {
         window.draw(strings_button);
 
         window.display();
+
+        old_gaps = gaps;
     }
     return 0;
 }
