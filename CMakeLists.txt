@@ -17,6 +17,11 @@ add_executable(qalam
 # target_compile_options(qalam PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)
 # target_link_options(qalam PRIVATE -fsanitize=address)
 
+target_compile_options(qalam PRIVATE
+    -Wall -Wextra -Wpedantic -Werror -Wshadow -Wreorder -Wunused-variable
+)
+set_source_files_properties(src/dialogues.cpp PROPERTIES COMPILE_OPTIONS "-Wsign-conversion")
+
 target_link_libraries(qalam PRIVATE
     SFML::Graphics
     SFML::Window

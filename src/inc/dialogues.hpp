@@ -10,7 +10,7 @@ void save(const std::vector<std::string>& list, std::string filename);
 
 void handle_save_window_event(
     const sf::Event& event, sf::RenderWindow& window,
-    std::string& filename,  int& cursorX,
+    std::string& filename,  size_t& cursorX,
     const std::vector<std::string>& lines
 );
 
@@ -19,8 +19,8 @@ void make_save_window(std::string& save_filename, const std::vector<std::string>
 class Button : public sf::Drawable {
 private:
     sf::RectangleShape bg;
-    sf::Text text;
     sf::Font& font;
+    sf::Text text;
 
     std::function<void()> onClick;
     std::function<void()> onRightClick;

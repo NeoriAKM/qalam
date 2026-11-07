@@ -168,7 +168,7 @@ sf::Color cmd_asm(std::string line, std::string filename, sf::Color non) {
     size_t i = 0;
     while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) i++;
     size_t j = i;
-    while (j < line.size() && (std::isalnum((unsigned char)line[j]) || line[j] == '_')) j++;
+    while (j < line.size() && (std::isalnum(static_cast<unsigned char>(line[j])) || line[j] == '_')) j++;
     std::string mnemonic = lower(line.substr(i, j - i));
 
     if (here(no_arg_instr, mnemonic))   return sf::Color(100, 100, 255);

@@ -19,18 +19,18 @@ void save(const vector<string>& list, string filename) {
 
 void handle_save_window_event(
     const Event& event, RenderWindow& window,
-    string& buffer, int& cursorX,
+    string& buffer, size_t& cursorX,
     const std::vector<string>& lines
 ) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         if (key->code == Keyboard::Key::Left && cursorX > 0) cursorX--;
-        if (key->code == Keyboard::Key::Right && cursorX < (int)buffer.size()) cursorX++;
+        if (key->code == Keyboard::Key::Right && cursorX < buffer.size()) cursorX++;
 
         if (key->code == Keyboard::Key::Backspace && cursorX > 0) {
             buffer.erase(cursorX - 1, 1);
             cursorX--;
         }
-        if (key->code == Keyboard::Key::Delete && cursorX < (int)buffer.size()) {
+        if (key->code == Keyboard::Key::Delete && cursorX < buffer.size()) {
             buffer.erase(cursorX, 1);
         }
         if (key->code == Keyboard::Key::Enter) {
@@ -59,7 +59,7 @@ void make_save_window(string& save_filename, const vector<string>& lines) {
     Vector2f windowSize(500.f, 100.f);
 
     RenderWindow window(VideoMode(
-        {(unsigned int)windowSize.x, (unsigned int)windowSize.y}
+        {static_cast<unsigned int>(windowSize.x), static_cast<unsigned int>(windowSize.y)}
     ), "Save window");
     window.setFramerateLimit(30);
 
@@ -69,12 +69,12 @@ void make_save_window(string& save_filename, const vector<string>& lines) {
         return;
     }
 
-    int charsize = 15;
+    unsigned int charsize = 15;
     
     const Glyph& glyph = font.getGlyph('M', charsize, false);
     float charw = glyph.advance;
     
-    int cursorX = (int)buffer.size();
+    size_t cursorX = buffer.size();
 
     const float line_height = font.getLineSpacing(charsize);
 

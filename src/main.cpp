@@ -27,7 +27,7 @@ std::vector<std::string> fonts = {
     ! Coming soon
 */
 
-
+using namespace std;
 
 std::string repeat(const std::string& str, int times) {
     std::string result;
@@ -167,18 +167,18 @@ int main(int argc, char* argv[]) {
     float charw = glyph.advance;
 
     float gaps = charw * (std::to_string((int)lines.size()).size() + 1);
-    float old_gaps;
+    float old_gaps = 1.f;
     
-    int cursorY = (int)lines.size()-1;
-    int cursorX = buflen(cursorY, lines);
+    size_t cursorY = lines.size()-1;
+    size_t cursorX = buflen(cursorY, lines);
 
     int tick = 0;                     
     
-    int offsetY = 0;
-    int offsetX = 0;
+    float offsetY = 0;
+    float offsetX = 0;
     
-    int first_visible;
-    int last_visible ;
+    size_t first_visible;
+    size_t last_visible ;
 
     std::string cb_text = "";
 
@@ -257,7 +257,8 @@ int main(int argc, char* argv[]) {
 
         cursor_button.setText(cb_text);
         strings_button.setText(std::to_string((int)lines.size()));
-        first_visible = std::max(0, (int)(offsetY / line_height));
+        
+        first_visible = static_cast<size_t>(std::max(0, (int)(offsetY / line_height)));
         last_visible  = std::min((int)lines.size() - 1,
                                  (int)((offsetY + windowSize.y) / line_height) + 1);
 
@@ -280,7 +281,7 @@ int main(int argc, char* argv[]) {
                 if (key->code==sf::Keyboard::Key::Right) {
                     if (cursorX < buflen(cursorY, lines))
                         cursorX++;
-                    else if (cursorY != (int)lines.size()-1) {
+                    else if (cursorY != lines.size()-1) {
                         cursorX=0; 
                         cursorY++;
                     }
@@ -289,7 +290,7 @@ int main(int argc, char* argv[]) {
                 // ========== Up-Down keys ==========
                 float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
 
-                if (key->code == sf::Keyboard::Key::Down && cursorY < (int)lines.size()-1) {
+                if (key->code == sf::Keyboard::Key::Down && cursorY < lines.size()-1) {
                     cursorY++;
 
                     if (cursorY > last_visible)  offsetY += line_height;
@@ -335,16 +336,13 @@ int main(int argc, char* argv[]) {
                         cursorY--;
                         cursorX = old_len;
 
-                        if (cursorY < 0) cursorY = 0;
-                        if (cursorY >= (int)lines.size()) cursorY = (int)lines.size() - 1;
-                        if (cursorX < 0) cursorX = 0;
-                        if (cursorX > (int)buflen(cursorY, lines)) cursorX = buflen(cursorY, lines);
+                        if (cursorY >= lines.size()) cursorY = lines.size() - 1;
+                        if (cursorX > buflen(cursorY, lines)) cursorX = buflen(cursorY, lines);
 
-                        float max_scroll = std::max(0.f, lines.size() * line_height - windowSize.y + 100.f);
                         if (offsetY > max_scroll) offsetY = (int)max_scroll;
                         if (offsetY < 0) offsetY = 0;
 
-                        first_visible = std::max(0, (int)(offsetY / line_height));
+                        first_visible = std::max(0.f, (offsetY / line_height));
                         last_visible  = std::min(
                             (int)lines.size() - 1,
                             (int)((offsetY + windowSize.y) / line_height) + 1
@@ -366,7 +364,7 @@ int main(int argc, char* argv[]) {
                     std::string rest = lines[cursorY].substr(cursorX);
                     lines[cursorY].erase(cursorX);
 
-                    int indent = 0;
+                    size_t indent = 0;
                     while (indent < lines[cursorY].size() && lines[cursorY][indent] == ' ') indent++;
 
                     lines.insert(lines.begin() + cursorY + 1, (std::string(indent, ' ') + rest));
@@ -464,7 +462,6 @@ int main(int argc, char* argv[]) {
             if (cursorX * charw > windowSize.x + offsetX) offsetX += charw;
         }
 
-        int cursor_gaps = (int)std::to_string((int)lines.size()).size() + 1;
         gaps = charw * (std::to_string((int)lines.size()).size() + 1);
 
         cursor.setPosition({
@@ -477,7 +474,7 @@ int main(int argc, char* argv[]) {
 
         window.draw(numsbg);
 
-        for (int i = first_visible; i <= last_visible; i++) {
+        for (size_t i = first_visible; i <= last_visible; i++) {
 
             text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
