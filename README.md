@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Last commit](https://img.shields.io/github/last-commit/NeoriAKM/qalam?color=red)
 
-# Qalam - Text editor (v1.3.1)
+# Qalam - Text editor (v1.3.2)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
@@ -70,17 +70,26 @@ Standart config:
 }
 ```
 
-- `font_size` - any int-typed value.
+- `font_size` - size for your font. type - unsigned int
 - `font` - absolute path to your font. `/usr/share/fonts/TTF/DejaVuSansMono.ttf` - path only for Arch linux
-- `theme` - `"dark"` or `"light"`
+- `theme` - `"dark"` or `"light"`. string type
+- `fps` - unsigned int typed value. Contains max FPS for Qalam window
 
 - `w_width` and `w_height` - resolution of window. I don't know how to do it dynamic
 
-- `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file.
+- `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file
 
 ## Last update
 
-### 1.3.x
+### 1.3.2
+
+- Added so many warning flags to CMakeLists.txt
+
+- Fixed visual bug: It is draws lines over the background of numbers.
+
+- Messages moved to new file - `helper.cpp`
+
+### 1.3 & 1.3.1
 
 - Added string indexes lefter from text
 
@@ -90,19 +99,24 @@ Standart config:
 
 - Fixed bug, thats going segfault if you press backspace on empty last line. Now thats okay
 
-### 1.2.2
+### 1.2.1 & 1.2.2
+
+- For contributors: You can make button with 1 variable. I made class Button
 
 - added "unnamed" & "placeholder" parameters to config.
 
 - fixed few bugs in `dialogues.cpp`
 
-### 1.2.1
-
-- For contributors: You can make button with 1 variable. I made class Button
-
 ### 1.2
 
 Syntax highlight
+
+## Milestones
+
+- [x] get 1000 lines with `find src -type f -name "*.cpp" -exec cat {} + | wc -l`
+- [ ] get 2000 lines
+- [ ] get 5000 lines
+- [ ] split draw cycle to tokens
 
 ## Gallery
 

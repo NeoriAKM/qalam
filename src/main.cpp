@@ -1,5 +1,7 @@
-// Qalam - Text editor v1.3.1
-// Copyright NeoriAKM(c)
+// ---------------------------- //
+// Qalam - Text editor v1.3.2   //
+// Copyright NeoriAKM(c)        //
+// ---------------------------- //
 
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Graphics.hpp>
@@ -17,6 +19,7 @@
 #include "inc/dialogues.hpp"
 #include "inc/config.hpp"
 #include "inc/syntax_hl.hpp"
+#include "inc/helper.hpp"
 
 /*
 std::vector<std::string> fonts = {
@@ -58,23 +61,11 @@ int main(int argc, char* argv[]) {
     sf::Color theme_color2 = sf::Color::Black; // bg
     
     for (int i=1; i<argc; i++) {
-        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
-            std::cout << "+-------------------- help msg ----------------------+\n";
-            std::cout << "| left  click to button - quick save                 |\n";
-            std::cout << "| right click to button - choose path to save        |\n";
-            std::cout << "|                                                    |\n";
-            std::cout << "|          read about config in README.md            |\n";
-            std::cout << "+----------------------------------------------------+\n";
-            std::cout << "| qalam <file>  -  open this file with qalam         |\n";
-            std::cout << "+-------------------- hotkeys -----------------------+\n";
-            std::cout << "| Ctrl+S        -  quick save                        |\n";
-            std::cout << "| Ctrl+Shift+S  -  save with path choice             |\n";
-            std::cout << "| Ctrl+U        -  moving cursor to center of screen |\n";
-            std::cout << "+---------------------- flags -----------------------+\n";
-            std::cout << "| --help  -h        - opening this reference         |\n";
-            std::cout << "| --debug -d <file> - turning on debug mode          |\n";
-            std::cout << "+----------------------------------------------------+\n\n";
-            std::cout << "Good luck for your future projects with(out) Qalam!\n";
+        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
+            copyright_msg();
+            return 0;
+        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            help_msg();
             return 0;
         } else if (std::strcmp(argv[i], "--debug") == 0 || std::strcmp(argv[i], "-d") == 0) {
             debug_mode = true;
@@ -157,17 +148,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    const sf::Glyph& glyph = font.getGlyph('M', font_size, false);
-    const sf::Glyph& glyph_test = font.getGlyph('i', font_size, false);
+    const sf::Glyph& glyph1 = font.getGlyph('M', font_size, false);
+    const sf::Glyph& glyph2 = font.getGlyph('i', font_size, false);
 
-    if (glyph.advance != glyph_test.advance) {
+    if (glyph1.advance != glyph2.advance) {
         std::cerr << "\nWARNING: Please, can you use mono font? '" <<
-                     font_path << "' is not mono, or not fully mono font\n";
+                    font_path << "' is not mono, or not fully mono font\n";
     }
 
-    float charw = glyph.advance;
+    float charw = glyph1.advance;
 
-    float gaps = charw * (std::to_string((int)lines.size()).size() + 1);
+    float     gaps = charw*(to_string(lines.size()).size()+1);
     float old_gaps = 1.f;
     
     size_t cursorY = lines.size()-1;
@@ -184,17 +175,17 @@ int main(int argc, char* argv[]) {
     std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
-    const float text_x = 20.f;
-    const float text_y = 20.f;
+    const float text_x = charw;
+    const float text_y = charw;
 
     sf::Text    text(font, lines[cursorY], font_size);
     sf::Text strnums(font, "",             font_size);
     sf::RectangleShape cursor({2.f, line_height});
-    sf::RectangleShape numsbg({gaps + (charw/2), windowSize.y}); 
+    sf::RectangleShape numsbg({gaps + (charw*2), windowSize.y}); 
 
 
-    text.setPosition({20.f, 0.f});
-    strnums.setPosition({20.f, 0.f});
+    text.setPosition({charw, 0.f});
+    strnums.setPosition({charw, 0.f});
     numsbg.setPosition({0.f, 0.f});
     
     text.setFillColor(theme_color1);
@@ -267,7 +258,7 @@ int main(int argc, char* argv[]) {
 
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                if (debug_mode) for (size_t i=0; i<lines.size(); i++) {cout << lines[i] << '\n';}
+                if (debug_mode) vector_msg(lines);
                 window.close();
             }
 
@@ -465,7 +456,7 @@ int main(int argc, char* argv[]) {
             if (cursorX * charw > windowSize.x + offsetX) offsetX += charw;
         }
 
-        gaps = charw * (std::to_string((int)lines.size()).size() + 1);
+        gaps = charw * (to_string(lines.size()).size()+1);
 
         cursor.setPosition({
             text_x + cursorX * charw + gaps - offsetX,
@@ -475,20 +466,22 @@ int main(int argc, char* argv[]) {
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
 
-        window.draw(numsbg);
-
         for (size_t i = first_visible; i <= last_visible; i++) {
-
             text.setFillColor(HL(lines[i], save_filename, theme_color1));
             text.setString(lines[i]);
             text.setPosition({text_x + gaps - offsetX, text_y + i * line_height - offsetY});
             
-            strnums.setString(std::to_string(i+1));
+            window.draw(text);
+        }
+        
+        window.draw(numsbg);
+
+        for (size_t i = first_visible; i <= last_visible; i++) {
+            strnums.setString(to_string(i+1));
             sf::FloatRect bounds = strnums.getLocalBounds();
-            strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 2), 0.f});
+            strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 1.5f), 0.f});
             strnums.setPosition({text_x + gaps /*- offsetX*/, text_y + i * line_height - offsetY});
 
-            window.draw(text);
             window.draw(strnums);
         }
         
