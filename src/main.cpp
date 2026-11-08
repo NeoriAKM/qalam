@@ -29,16 +29,17 @@ std::vector<std::string> fonts = {
 
 using namespace std;
 
-std::string repeat(const std::string& str, int times) {
-    std::string result;
+/*
+std::string repeat(const string& str, size_t times) {
+    string result;
     result.reserve(str.length() * times);
     for (int i = 0; i < times; ++i) {
         result += str;
     }
     return result;
-}
+}*/
 
-static size_t buflen(int line, const std::vector<std::string>& lines) {return lines[line].size();}
+static size_t buflen(size_t line, const vector<string>& lines) {return lines[line].size();}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
@@ -85,8 +86,8 @@ int main(int argc, char* argv[]) {
     /////////////// config //////////////////
 
     std::string font_path;
-    int font_size;
-    int fps;
+    unsigned int font_size;
+    unsigned int fps;
     std::string theme;
 
     int w_width;
@@ -172,7 +173,7 @@ int main(int argc, char* argv[]) {
     size_t cursorY = lines.size()-1;
     size_t cursorX = buflen(cursorY, lines);
 
-    int tick = 0;                     
+    unsigned int tick = 0;                     
     
     float offsetY = 0;
     float offsetX = 0;
@@ -258,13 +259,15 @@ int main(int argc, char* argv[]) {
         cursor_button.setText(cb_text);
         strings_button.setText(std::to_string((int)lines.size()));
         
-        first_visible = static_cast<size_t>(std::max(0, (int)(offsetY / line_height)));
-        last_visible  = std::min((int)lines.size() - 1,
-                                 (int)((offsetY + windowSize.y) / line_height) + 1);
+        first_visible = static_cast<size_t>(max(0.f, offsetY / line_height));
+        last_visible  = min(
+            lines.size() - 1,
+            static_cast<size_t>(max(0.f, (offsetY + windowSize.y) / line_height)) + 1
+        );
 
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                if (debug_mode) for (int i=0; i<(int)lines.size(); i++) {std::cout << lines[i] << '\n';}
+                if (debug_mode) for (size_t i=0; i<lines.size(); i++) {cout << lines[i] << '\n';}
                 window.close();
             }
 
@@ -330,9 +333,9 @@ int main(int argc, char* argv[]) {
                         lines[cursorY].erase(cursorX - 1, 1);
                         cursorX--;
                     } else if (cursorY > 0) {
-                        int old_len = buflen(cursorY - 1, lines);
+                        size_t old_len = buflen(cursorY - 1, lines);
                         lines[cursorY - 1] += lines[cursorY];
-                        lines.erase(lines.begin() + cursorY);
+                        lines.erase(lines.begin() + static_cast<ptrdiff_t>(cursorY));
                         cursorY--;
                         cursorX = old_len;
 
@@ -342,10 +345,10 @@ int main(int argc, char* argv[]) {
                         if (offsetY > max_scroll) offsetY = (int)max_scroll;
                         if (offsetY < 0) offsetY = 0;
 
-                        first_visible = std::max(0.f, (offsetY / line_height));
-                        last_visible  = std::min(
-                            (int)lines.size() - 1,
-                            (int)((offsetY + windowSize.y) / line_height) + 1
+                        first_visible = static_cast<size_t>(max(0, (int)(offsetY / line_height)));
+                        last_visible  = min(
+                            lines.size() - 1,
+                            static_cast<size_t>(max(0.f, (offsetY + windowSize.y) / line_height)) + 1
                         );
                     }
                 }
@@ -367,7 +370,7 @@ int main(int argc, char* argv[]) {
                     size_t indent = 0;
                     while (indent < lines[cursorY].size() && lines[cursorY][indent] == ' ') indent++;
 
-                    lines.insert(lines.begin() + cursorY + 1, (std::string(indent, ' ') + rest));
+                    lines.insert(lines.begin() + static_cast<std::ptrdiff_t>(cursorY+1), (std::string(indent, ' ') + rest));
                     cursorY++;
                     cursorX = indent;
                 }
