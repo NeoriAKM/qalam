@@ -39,9 +39,10 @@ cmake --build build
 
 ## Hotkeys
 
-- Ctrl+S and Ctrl+Shift+S : classic
+- Ctrl+S and Ctrl+Shift+S : classical saving file
 - Ctrl+U : moving cursor to center of screen
 - Ctrl+Scroll : scrolling 2x faster
+- Ctrl+C and Ctrl+Shift+C : Copying string under cursor **or** all file to clipboard
 
 ## Flags
 
@@ -82,6 +83,8 @@ Standart config:
 ## Last update
 
 ### 1.3.2
+
+- 2 new hotkeys. Ctrl+C copying string under cursor, Ctrl+Shift+C - copying all file.
 
 - Added so many warning flags to CMakeLists.txt
 

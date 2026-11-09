@@ -32,18 +32,6 @@ std::vector<std::string> fonts = {
 
 using namespace std;
 
-/*
-std::string repeat(const string& str, size_t times) {
-    string result;
-    result.reserve(str.length() * times);
-    for (int i = 0; i < times; ++i) {
-        result += str;
-    }
-    return result;
-}*/
-
-static size_t buflen(size_t line, const vector<string>& lines) {return lines[line].size();}
-
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -54,8 +42,8 @@ int main(int argc, char* argv[]) {
 
     bool debug_mode = false;
 
-    std::vector<std::string> lines = {};
-    std::string save_filename = "";
+    vector<string> lines = {};
+    string save_filename = "";
     
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
@@ -67,7 +55,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             help_msg();
             return 0;
-        } else if (std::strcmp(argv[i], "--debug") == 0 || std::strcmp(argv[i], "-d") == 0) {
+        } else if (strcmp(argv[i], "--debug") == 0 || strcmp(argv[i], "-d") == 0) {
             debug_mode = true;
         } else if (argv[i][0] != '-') {
             save_filename = argv[i];
@@ -76,36 +64,33 @@ int main(int argc, char* argv[]) {
 
     /////////////// config //////////////////
 
-    std::string font_path;
-    unsigned int font_size;
-    unsigned int fps;
-    std::string theme;
+    string font_path = config.font_path;
+    unsigned int font_size = config.font_size;
+    string theme = config.theme;
+    unsigned int fps = config.fps;
 
-    int w_width;
-    int w_height;
+    int w_width = max(200, config.w_width);
+    int w_height= max(200, config.w_height);
 
-    std::string placeholder;
-    std::string unnamed;
-
-    font_path = config.font_path;
-    font_size = config.font_size;
-    theme = config.theme;
-    fps = config.fps;
-
-    w_width = std::max(200, config.w_width);
-    w_height= std::max(200, config.w_height);
-
-    placeholder = config.placeholder;
-    unnamed = config.unnamed;
+    string placeholder = config.placeholder;
+    string unnamed = config.unnamed;
     
     if (debug_mode) {
-        std::cout << "Font: "  << font_path << '\n';
-        std::cout << "Size: "  << font_size << '\n';
-        std::cout << "Theme: " << theme     << "\n";
-        std::cout << "Window: "<< w_width << 'x' << w_height << '\n';
-        std::cout << "Placeholder: " << placeholder << '\n';
-        std::cout << "Unnamed: " << unnamed << '\n';
-        std::cout << "FPS: " << fps << '\n';
+        vector<pair<string,string>> cfg_base = {
+            {"Font",        font_path},
+            {"Size",        to_string(font_size)},
+            {"Theme",       theme},
+            {"Window",      to_string(w_width) + "x" + to_string(w_height)},
+            {"Placeholder", placeholder},
+            {"Unnamed",     unnamed},
+            {"FPS",         to_string(fps)},
+        };
+
+        
+        // output
+        cout << repeat("-", 7) << " Config values " << repeat("-",8);
+        for (auto& [a, b] : cfg_base) cout <<a<<": "<<b<<'\n';
+        cout << repeat("-", 30);
     }
 
 
@@ -116,22 +101,16 @@ int main(int argc, char* argv[]) {
 
     ///////////////////////////////////////////////
 
-    if (save_filename == "") {
-        save_filename = unnamed;
-    }
+    if (save_filename == "") save_filename = unnamed;
 
-    std::ifstream in(save_filename);
+    ifstream in(save_filename);
 
     if (in.is_open()) {
-        std::string line;
-        while (std::getline(in, line)) {
-            lines.push_back(line);
-        }
+        string line;
+        while (getline(in, line)) lines.push_back(line);
         in.close();
     }
-    if (lines.empty()) {
-        lines.push_back(placeholder);
-    }
+    if (lines.empty()) lines.push_back(placeholder);
 
     sf::Vector2f windowSize(w_width, w_height);
 
@@ -206,7 +185,7 @@ int main(int argc, char* argv[]) {
     });
 
     Button strings_button(
-        font, std::to_string((int)lines.size()),
+        font, std::to_string(lines.size()),
         {240, windowSize.y-60}, {100, 40}, [&]() {}
     );
 
@@ -257,10 +236,7 @@ int main(int argc, char* argv[]) {
         );
 
         while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) {
-                if (debug_mode) vector_msg(lines);
-                window.close();
-            }
+            if (event->is<sf::Event::Closed>()) window.close();
 
             // ========== Left Right keys ==========
 
@@ -366,16 +342,26 @@ int main(int argc, char* argv[]) {
                     cursorX = indent;
                 }
                 /////////// Ctrl+Something ///////////
-                if (key->code == sf::Keyboard::Key::S && key->control && !key->shift) { // ctrl+S
-                    save(lines, save_filename);
-                }
+                // ! CURSOR ACTS
                 if (key->code == sf::Keyboard::Key::U && key->control && !key->shift) { // ctrl+U
                     cursorY = (last_visible + first_visible) / 2;
                     cursorX = buflen(cursorY, lines);
                 }
 
+                // ! SAVES
+                if (key->code == sf::Keyboard::Key::S && key->control && !key->shift) { // ctrl+S
+                    save(lines, save_filename);
+                }
                 if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {  // Ctrl+Shift+S
                     make_save_window(save_filename, lines);
+                }
+
+                // ! COPIES
+                if (key->code == sf::Keyboard::Key::C && key->control && !key->shift) {  // Ctrl+C
+                    copy_string(lines, cursorY);
+                }
+                if (key->code == sf::Keyboard::Key::C && key->control && key->shift) {  // Ctrl+Shift+C
+                    copy_vec(lines);
                 }
             }
 
