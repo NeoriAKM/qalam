@@ -3,6 +3,7 @@
 // Copyright NeoriAKM(c)        //
 // ---------------------------- //
 
+#include <SFML/Window/Clipboard.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -360,8 +361,13 @@ int main(int argc, char* argv[]) {
                 if (key->code == sf::Keyboard::Key::C && key->control && !key->shift) {  // Ctrl+C
                     copy_string(lines, cursorY);
                 }
-                if (key->code == sf::Keyboard::Key::C && key->control && key->shift) {  // Ctrl+Shift+C
+                if (key->code == sf::Keyboard::Key::C && key->control && key->shift)  { // Ctrl+Shift+C
                     copy_vec(lines);
+                }
+                if (key->code == sf::Keyboard::Key::V && key->control && !key->shift) { // Ctrl+V
+                    const string clipboard = sf::Clipboard::getString().toAnsiString();
+                    lines[cursorY].insert(cursorX, clipboard);
+                    cursorX += clipboard.size();
                 }
             }
 

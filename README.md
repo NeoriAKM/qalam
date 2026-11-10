@@ -43,6 +43,7 @@ cmake --build build
 - Ctrl+U : moving cursor to center of screen
 - Ctrl+Scroll : scrolling 2x faster
 - Ctrl+C and Ctrl+Shift+C : Copying string under cursor **or** all file to clipboard
+- Ctrl+V : pasting text from clipboard
 
 ## Flags
 
