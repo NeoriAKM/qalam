@@ -58,30 +58,16 @@ void errorFn(
 //////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-    bool debug_mode = false;
-    bool mod_flag = true; // if true - mods running
+    Flags flag;
     
+    Args args = parse_args(argc, argv);
+
     vector<string> lines = {};
-    string save_filename = "";
+    string save_filename = args.filename;
     
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
     
-    for (int i=1; i<argc; i++) {
-        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
-            copyright_msg();
-            return 0;
-        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-            help_msg();
-            return 0;
-        } else if (strcmp(argv[i], "--debug") == 0 || strcmp(argv[i], "-d") == 0) {
-            debug_mode = true;
-        } else if (strcmp(argv[i], "--nomods") == 0 || strcmp(argv[i], "-m") == 0) {
-            mod_flag = false;
-        } else if (argv[i][0] != '-') {
-            save_filename = argv[i];
-        }
-    }
 
     
     /////////////// config //////////////////
@@ -100,7 +86,7 @@ int main(int argc, char* argv[]) {
     string placeholder = config.placeholder;
     string unnamed = config.unnamed;
     
-    if (debug_mode) {
+    if (flag.debug) {
         vector<pair<string,string>> cfg_base = {
             {"Font",        font_path},
             {"Size",        to_string(font_size)},
@@ -143,7 +129,7 @@ int main(int argc, char* argv[]) {
     
     WrenHandle* update_handle = nullptr;
     
-    if (mod_flag) {
+    if (flag.mods) {
         WrenInterpretResult res = wrenInterpret(vm, "main", mod_src.c_str());
         if (res != WREN_RESULT_SUCCESS) cerr << "[WREN] Failed to load mod!\n";
         else {
@@ -260,7 +246,7 @@ int main(int argc, char* argv[]) {
     /* ! //////////////////// MAINLOOP ///////////////////////// ! */
 
     while (window.isOpen()) {
-        if (mod_flag){
+        if (flag.mods){
             if (update_handle != nullptr) {
                 WrenInterpretResult result = wrenCall(vm, update_handle);
                 if (result != WREN_RESULT_SUCCESS) {
