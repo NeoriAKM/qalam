@@ -1,5 +1,5 @@
 // ---------------------------- //
-// Qalam - Text editor v1.3.2   //
+// Qalam - Text editor v1.3.3   //
 // Copyright NeoriAKM(c)        //
 // ---------------------------- //
 
@@ -59,7 +59,6 @@ void errorFn(
 
 int main(int argc, char* argv[]) {
     Flags flag;
-    
     Args args = parse_args(argc, argv);
 
     vector<string> lines = {};
@@ -67,8 +66,6 @@ int main(int argc, char* argv[]) {
     
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
-    
-
     
     /////////////// config //////////////////
 

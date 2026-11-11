@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Last commit](https://img.shields.io/github/last-commit/NeoriAKM/qalam?color=red)
 
-# Qalam - Text editor (v1.3.2)
+# Qalam - Text editor (v1.3.3)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
@@ -21,8 +21,14 @@ The name comes from the Arabic word قلم (qalam), meaning "pen".
 - CMake (3.16+)
 - [SFML 3](https://www.sfml-dev.org/) (Graphics, Window, System)
 - [nlohmann/json](https://github.com/nlohmann/json)
+- [wren](https://wren.io)
 
-*On Arch Linux:* `sudo pacman -S cmake sfml nlohmann-json`
+*On Arch Linux:*
+
+```bash
+sudo pacman -S cmake sfml nlohmann-json
+yay -S wren
+```
 
 ## Build
 
@@ -50,6 +56,7 @@ cmake --build build
 You can use some flags.
 - `--help` or `-h`: for reference
 - `--debug` or `-d`: for debug msgs in shell
+- `--version` or `-v`: shows version of 
 
 ## Configuration
 
