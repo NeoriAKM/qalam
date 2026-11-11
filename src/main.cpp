@@ -10,6 +10,10 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Shape.hpp>
 
+extern "C" {
+    #include <wren.h>
+}
+
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -33,16 +37,30 @@ std::vector<std::string> fonts = {
 
 using namespace std;
 
+void writeFn(WrenVM* /* vm */, const char* text) {cout << text;}
+
+void errorFn(
+    WrenVM* /* vm */, WrenErrorType errorType,
+    const char* module, const int line, const char* msg)
+    {
+
+    if (errorType == WREN_ERROR_COMPILE) {
+        std::cerr << "[WREN COMPILE ERROR] " << module << ":" << line << " - " << msg << "\n";
+    } else if (errorType == WREN_ERROR_RUNTIME) {
+        std::cerr << "[WREN RUNTIME ERROR] " << msg << "\n";
+    } else if (errorType == WREN_ERROR_STACK_TRACE) {
+        std::cerr << "[WREN TRACE] " << module << ":" << line << " - " << msg << "\n";
+    }
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
 //////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-    Config config;
-    config.load();
-
     bool debug_mode = false;
-
+    bool mod_flag = true; // if true - mods running
+    
     vector<string> lines = {};
     string save_filename = "";
     
@@ -58,13 +76,19 @@ int main(int argc, char* argv[]) {
             return 0;
         } else if (strcmp(argv[i], "--debug") == 0 || strcmp(argv[i], "-d") == 0) {
             debug_mode = true;
+        } else if (strcmp(argv[i], "--nomods") == 0 || strcmp(argv[i], "-m") == 0) {
+            mod_flag = false;
         } else if (argv[i][0] != '-') {
             save_filename = argv[i];
         }
     }
 
+    
     /////////////// config //////////////////
 
+    Config config;
+    config.load();
+    
     string font_path = config.font_path;
     unsigned int font_size = config.font_size;
     string theme = config.theme;
@@ -72,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     int w_width = max(200, config.w_width);
     int w_height= max(200, config.w_height);
-
+    
     string placeholder = config.placeholder;
     string unnamed = config.unnamed;
     
@@ -86,26 +110,60 @@ int main(int argc, char* argv[]) {
             {"Unnamed",     unnamed},
             {"FPS",         to_string(fps)},
         };
-
+        
         
         // output
         cout << repeat("-", 7) << " Config values " << repeat("-",8);
         for (auto& [a, b] : cfg_base) cout <<a<<": "<<b<<'\n';
         cout << repeat("-", 30);
     }
-
-
+    
+    
     if (theme == "light") {
         theme_color1 = sf::Color(50, 50, 50);
         theme_color2 = sf::Color::White;
     }
-
+    
     ///////////////////////////////////////////////
+    
+    WrenConfiguration wrencfg;
+    wrenInitConfiguration(&wrencfg);
+
+    wrencfg.writeFn = writeFn;
+    wrencfg.errorFn = errorFn;
+
+    // getting information from mod
+    ifstream mod_file("/home/akm/.config/qalam/mod1.wren");
+    stringstream mod_buffer;
+    mod_buffer << mod_file.rdbuf();
+    string mod_src = mod_buffer.str();
+
+    WrenVM* vm = wrenNewVM(&wrencfg);
+    if (!vm) {cerr << "Failed to create WrenVM!\n"; return 1;}
+    
+    WrenHandle* update_handle = nullptr;
+    
+    if (mod_flag) {
+        WrenInterpretResult res = wrenInterpret(vm, "main", mod_src.c_str());
+        if (res != WREN_RESULT_SUCCESS) cerr << "[WREN] Failed to load mod!\n";
+        else {
+            cout << "[WREN] Mod is loaded!\n";
+
+            wrenEnsureSlots(vm, 1);
+            wrenGetVariable(vm, "main", "update", 0);
+            if (wrenGetSlotType(vm,0)!=WREN_TYPE_NULL) update_handle = wrenGetSlotHandle(vm, 0);
+
+            else cout << "[WREN] No update() function found in mod.\n";
+        }
+    }
+    
+
+    //////////////////////////////////////////////////////
 
     if (save_filename == "") save_filename = unnamed;
-
+    
     ifstream in(save_filename);
-
+    
     if (in.is_open()) {
         string line;
         while (getline(in, line)) lines.push_back(line);
@@ -146,17 +204,13 @@ int main(int argc, char* argv[]) {
 
     unsigned int tick = 0;                     
     
-    float offsetY = 0;
-    float offsetX = 0;
-    
-    size_t first_visible;
-    size_t last_visible ;
+    float offsetY = 0;    float offsetX = 0;
+    size_t first_visible; size_t last_visible;
 
     std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
-    const float text_x = charw;
-    const float text_y = charw;
+    const float text_x = charw; const float text_y = charw;
 
     sf::Text    text(font, lines[cursorY], font_size);
     sf::Text strnums(font, "",             font_size);
@@ -178,30 +232,25 @@ int main(int argc, char* argv[]) {
         [&]() {save(lines, save_filename);},
         [&]() {make_save_window(save_filename, lines);}
     );
-
     Button cursor_button(font, "???",
         {20, windowSize.y-60}, {200, 40}, [&]() {
         cursorY = (last_visible + first_visible) / 2;
         cursorX = buflen(cursorY, lines);
     });
-
     Button strings_button(
         font, std::to_string(lines.size()),
         {240, windowSize.y-60}, {100, 40}, [&]() {}
     );
-
     save_button.setColors(
         sf::Color(40, 160, 40, 200),
         sf::Color(70, 255, 70, 200),
         sf::Color(50, 210, 50, 200)
     );
-
     cursor_button.setColors(
         sf::Color(60, 60, 60, 200),
         sf::Color(100, 100, 100, 200),
         sf::Color(80, 80, 80, 200)
     );
-
     strings_button.setColors(
         sf::Color(175, 175, 100, 200),
         sf::Color(255, 255, 150, 200),
@@ -211,6 +260,16 @@ int main(int argc, char* argv[]) {
     /* ! //////////////////// MAINLOOP ///////////////////////// ! */
 
     while (window.isOpen()) {
+        if (mod_flag){
+            if (update_handle != nullptr) {
+                WrenInterpretResult result = wrenCall(vm, update_handle);
+                if (result != WREN_RESULT_SUCCESS) {
+                    std::cerr << "[WREN ERROR] Running caught error\n";
+                }
+            }
+        }
+
+        /////////////////////////////////////////////////////////
 
         tick++;
 
@@ -472,7 +531,7 @@ int main(int argc, char* argv[]) {
             strnums.setString(to_string(i+1));
             sf::FloatRect bounds = strnums.getLocalBounds();
             strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 1.5f), 0.f});
-            strnums.setPosition({text_x + gaps /*- offsetX*/, text_y + i * line_height - offsetY});
+            strnums.setPosition({text_x + gaps, text_y + i * line_height - offsetY});
 
             window.draw(strnums);
         }
@@ -488,5 +547,7 @@ int main(int argc, char* argv[]) {
 
         old_gaps = gaps;
     }
+    if (update_handle != nullptr) wrenReleaseHandle(vm, update_handle);
+    wrenFreeVM(vm);
     return 0;
 }
