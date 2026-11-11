@@ -14,7 +14,7 @@ The name comes from the Arabic word قلم (qalam), meaning "pen".
 - Saving files
 - Custom font, font size, and theme via config file
 - Dark and light themes
-- primitive syntax highlight (only for NASM. But comments in any lang)
+- syntax highlight (only for NASM, and some for C++/C)
 
 ## Dependencies
 - C++17 compiler (GCC/Clang)
@@ -89,6 +89,12 @@ Standart config:
 - `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file
 
 ## Last update
+
+### 1.3.3
+
+- More definitions been moved to helper file
+
+- Added MODS!
 
 ### 1.3.2
 
