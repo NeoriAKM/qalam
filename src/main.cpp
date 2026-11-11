@@ -411,6 +411,7 @@ int main(int argc, char* argv[]) {
                     lines[cursorY].insert(cursorX, clipboard);
                     cursorX += clipboard.size();
                 }
+                tick = 0;
             }
 
             if (const auto* t = event->getIf<sf::Event::TextEntered>()) {
@@ -423,6 +424,8 @@ int main(int argc, char* argv[]) {
                     else if (typed == '"') {lines[cursorY].insert(cursorX, "\"\"");}
                     else                   {lines[cursorY].insert(cursorX, 1, typed);}
                     cursorX++;
+
+                    tick = 0;
                 }
             }
 
