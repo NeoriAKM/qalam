@@ -53,6 +53,8 @@ void errorFn(
     }
 }
 
+// void addBtn
+
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -116,7 +118,7 @@ int main(int argc, char* argv[]) {
     wrencfg.errorFn = errorFn;
 
     // getting information from mod
-    ifstream mod_file("/home/akm/.config/qalam/mod1.wren");
+    ifstream mod_file(string(getenv("HOME")) + "/.config/qalam/mod1.wren");
     stringstream mod_buffer;
     mod_buffer << mod_file.rdbuf();
     string mod_src = mod_buffer.str();
@@ -210,31 +212,34 @@ int main(int argc, char* argv[]) {
     cursor.setFillColor(theme_color1);
     numsbg.setFillColor(sf::Color(40, 40, 40, 220));
 
-    Button save_button(font, "save",
-        {windowSize.x-120, windowSize.y-60}, {100, 40},
-        [&]() {save(lines, save_filename);},
-        [&]() {make_save_window(save_filename, lines);}
-    );
-    Button cursor_button(font, "???",
-        {20, windowSize.y-60}, {200, 40}, [&]() {
-        cursorY = (last_visible + first_visible) / 2;
-        cursorX = buflen(cursorY, lines);
-    });
-    Button strings_button(
-        font, std::to_string(lines.size()),
-        {240, windowSize.y-60}, {100, 40}, [&]() {}
-    );
-    save_button.setColors(
+    vector<Button> buttons = {
+        Button(font, "save",  // ! save button
+            {windowSize.x-120, windowSize.y-60}, {100, 40},
+            [&]() {save(lines, save_filename);},
+            [&]() {make_save_window(save_filename, lines);}
+        ),
+        Button(font, "???",   // ! cursor pos button
+            {20, windowSize.y-60}, {200, 40}, [&]() {
+            cursorY = (last_visible + first_visible) / 2;
+            cursorX = buflen(cursorY, lines);
+        }),
+        Button(                        // ! string button
+            font, std::to_string(lines.size()),
+            {240, windowSize.y-60}, {100, 40}, [&]() {}
+        )
+    };
+
+    buttons[0].setColors(
         sf::Color(40, 160, 40, 200),
         sf::Color(70, 255, 70, 200),
         sf::Color(50, 210, 50, 200)
     );
-    cursor_button.setColors(
+    buttons[1].setColors(
         sf::Color(60, 60, 60, 200),
         sf::Color(100, 100, 100, 200),
         sf::Color(80, 80, 80, 200)
     );
-    strings_button.setColors(
+    buttons[2].setColors(
         sf::Color(175, 175, 100, 200),
         sf::Color(255, 255, 150, 200),
         sf::Color(210, 210, 120, 200)
@@ -263,14 +268,12 @@ int main(int argc, char* argv[]) {
 
         cb_text = "x: " + std::to_string(cursorX) + " | y: " + std::to_string(cursorY);
 
-        save_button.update(mousePos);
-        cursor_button.update(mousePos);
-        strings_button.update(mousePos);
+        for (auto& b : buttons) b.update(mousePos); // btns updatinh
         
         if (old_gaps != gaps) numsbg.setSize({gaps + (charw/2), windowSize.y});
 
-        cursor_button.setText(cb_text);
-        strings_button.setText(std::to_string((int)lines.size()));
+        buttons[1].setText(cb_text);
+        buttons[2].setText(to_string((int)lines.size()));
         
         first_visible = static_cast<size_t>(max(0.f, offsetY / line_height));
         last_visible  = min(
@@ -278,7 +281,7 @@ int main(int argc, char* argv[]) {
             static_cast<size_t>(max(0.f, (offsetY + windowSize.y) / line_height)) + 1
         );
 
-        while (const std::optional event = window.pollEvent()) {
+        while (const optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) window.close();
 
             // ========== Left Right keys ==========
@@ -435,11 +438,9 @@ int main(int argc, char* argv[]) {
                 sf::Vector2f pos((float)mouse->position.x, (float)mouse->position.y);
 
                 if (mouse->button == sf::Mouse::Button::Left) {
-                    save_button.handleClick(pos, false);
-                    cursor_button.handleClick(pos, false);
+                    for (auto& b : buttons) b.handleClick(pos, false);
                 } else if (mouse->button == sf::Mouse::Button::Right) {
-                    save_button.handleClick(pos, true);
-                    cursor_button.handleClick(pos, true);
+                    for (auto& b : buttons) b.handleClick(pos, true);
                 }
             }
 
@@ -525,9 +526,7 @@ int main(int argc, char* argv[]) {
         if (tick < fps/2) window.draw(cursor);
         else if (tick > fps-1) tick = 0;        
 
-        window.draw(save_button);
-        window.draw(cursor_button);
-        window.draw(strings_button);
+        for (auto& b : buttons) window.draw(b);
 
         window.display();
 
