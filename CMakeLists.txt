@@ -20,6 +20,7 @@ add_executable(qalam
     src/config.cpp
     src/syntax_hl.cpp
     src/helper.cpp
+    src/api.cpp
 )
 
 # target_compile_options(qalam PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)

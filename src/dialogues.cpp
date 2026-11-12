@@ -102,7 +102,7 @@ void make_save_window(string& save_filename, const vector<string>& lines) {
 
 Button::Button(Font& f, const string& label, Vector2f pos,
                Vector2f size, function<void()> action, function<void()> action2) 
-               : font(f), text(f), onClick(action), onRightClick(action2)
+               : font(&f), text(f), onClick(action), onRightClick(action2)
     {
     
     bg.setPosition(pos);
@@ -111,7 +111,7 @@ Button::Button(Font& f, const string& label, Vector2f pos,
     bg.setOutlineThickness(2);
     bg.setOutlineColor(Color::White);
    
-    text.setFont(font);
+    text.setFont(f);
     text.setString(label);
     text.setCharacterSize(20);
     text.setFillColor(Color::White);

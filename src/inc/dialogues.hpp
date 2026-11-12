@@ -19,7 +19,7 @@ void make_save_window(std::string& save_filename, const std::vector<std::string>
 class Button : public sf::Drawable {
 private:
     sf::RectangleShape bg;
-    sf::Font& font;
+    sf::Font* font;
     sf::Text text;
 
     std::function<void()> onClick;

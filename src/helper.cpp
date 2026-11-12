@@ -28,6 +28,7 @@ void help_msg() {
     cout << "| --help    -h        - opening this reference       |\n";
     cout << "| --version -v        - opening copyright text       |\n";
     cout << "| --debug   -d <file> - turning on debug mode        |\n";
+    cout << "| --nomods  -m <file> - turn off mods launch         |\n";
     cout << "+----------------------------------------------------+\n\n";
     cout << "Good luck for your future projects with(out) Qalam!\n";
     return;
