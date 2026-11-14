@@ -32,13 +32,13 @@ struct Editor {
     float offsetX = 0;
     float offsetY = 0;
     std::string save_filename;
-    
+
     std::vector<Button> buttons;
 };
 
 inline Args parse_args(int argc, char* argv[]) {
     Args args;
-    
+
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
             copyright_msg();

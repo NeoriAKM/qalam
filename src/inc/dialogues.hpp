@@ -24,7 +24,7 @@ private:
 
     std::function<void()> onClick;
     std::function<void()> onRightClick;
-    
+
     sf::Color normalColor = sf::Color(50, 50, 50);
     sf::Color hoverColor =  sf::Color(80, 80, 80);
     sf::Color activeColor = sf::Color::Cyan;
@@ -35,13 +35,13 @@ protected:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 public:
-    Button(sf::Font& f, const std::string& label, sf::Vector2f pos, sf::Vector2f size, 
+    Button(sf::Font& f, const std::string& label, sf::Vector2f pos, sf::Vector2f size,
            std::function<void()> action = nullptr, std::function<void()> action2 = nullptr);
 
     void handleClick(sf::Vector2f mousePos, bool rightClick);
     void update(sf::Vector2f mousePos);
     void setText(const std::string& newText);
-    
+
     sf::FloatRect getGlobalBounds() const;
     void setColor(const sf::Color& color);
     void setFgColor(const sf::Color& color);

@@ -37,17 +37,17 @@ int main(int argc, char* argv[]) {
     Flags flag;
     Args args = parse_args(argc, argv);
     Editor editor;
-    
+
     sf::Color theme_color1 = sf::Color::White; // fg
     sf::Color theme_color2 = sf::Color::Black; // bg
-    
+
     /////////////// config //////////////////
 
     Config config;
     config.load();
-    
+
     editor.save_filename = args.filename;
-    
+
     string font_path = config.font_path;
     unsigned int font_size = config.font_size;
     string theme = config.theme;
@@ -55,10 +55,10 @@ int main(int argc, char* argv[]) {
 
     int w_width = max(200, config.w_width);
     int w_height= max(200, config.w_height);
-    
+
     string placeholder = config.placeholder;
     string unnamed = config.unnamed;
-    
+
     if (flag.debug) {
         vector<pair<string,string>> cfg_base = {
             {"Font",        font_path},
@@ -69,22 +69,22 @@ int main(int argc, char* argv[]) {
             {"Unnamed",     unnamed},
             {"FPS",         to_string(fps)},
         };
-        
-        
+
+
         // output
         cout << repeat("-", 7) << " Config values " << repeat("-",8);
         for (auto& [a, b] : cfg_base) cout <<a<<": "<<b<<'\n';
         cout << repeat("-", 30);
     }
-    
-    
+
+
     if (theme == "light") {
         theme_color1 = sf::Color(50, 50, 50);
         theme_color2 = sf::Color::White;
     }
-    
+
     ///////////////////////////////////////////////
-    
+
     WrenConfiguration wrencfg;
     wrenInitConfiguration(&wrencfg);
 
@@ -103,10 +103,10 @@ int main(int argc, char* argv[]) {
             stringstream mod_buffer;
             mod_buffer << mod_file.rdbuf();
             string mod_src = mod_buffer.str();
-                
+
             vm = wrenNewVM(&wrencfg);
             if (!vm) {cerr << "Failed to create WrenVM!\n"; return 1;}
-        
+
             WrenInterpretResult res = wrenInterpret(vm, "main", mod_src.c_str());
             if (res != WREN_RESULT_SUCCESS) cerr << "[WREN] Failed to load mod!\n";
             else {
@@ -120,14 +120,14 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-    
+
 
     //////////////////////////////////////////////////////
 
     if (editor.save_filename == "") editor.save_filename = unnamed;
-    
+
     ifstream in(editor.save_filename);
-    
+
     if (in.is_open()) {
         string line;
         while (getline(in, line)) editor.lines.push_back(line);
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Font not found, Sorry. [return 1]\n";
         return 1;
     }
-    
+
     const sf::Glyph& glyph1 = font.getGlyph('M', font_size, false);
     const sf::Glyph& glyph2 = font.getGlyph('i', font_size, false);
 
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
     float     gaps = charw*(to_string(editor.lines.size()).size()+1);
     float old_gaps = 1.f;
 
-    unsigned int tick = 0;                     
+    unsigned int tick = 0;
 
     size_t first_visible; size_t last_visible;
 
@@ -175,13 +175,13 @@ int main(int argc, char* argv[]) {
     sf::Text    text(font, editor.lines[editor.cursorY], font_size);
     sf::Text strnums(font, "",             font_size);
     sf::RectangleShape cursor({2.f, line_height});
-    sf::RectangleShape numsbg({gaps + (charw*2), windowSize.y}); 
+    sf::RectangleShape numsbg({gaps + (charw*2), windowSize.y});
 
 
     text.setPosition({charw, 0.f});
     strnums.setPosition({charw, 0.f});
     numsbg.setPosition({0.f, 0.f});
-    
+
     text.setFillColor(theme_color1);
     strnums.setFillColor(theme_color1);
     cursor.setFillColor(theme_color1);
@@ -237,19 +237,19 @@ int main(int argc, char* argv[]) {
         tick++;
 
         sf::Vector2f mousePos(
-            (float)sf::Mouse::getPosition(window).x, 
+            (float)sf::Mouse::getPosition(window).x,
             (float)sf::Mouse::getPosition(window).y
         );
 
         cb_text = "x: " + to_string(editor.cursorX) + " | y: " + to_string(editor.cursorY);
 
         for (auto& b : editor.buttons) b.update(mousePos); // btns updatinh
-        
+
         if (old_gaps != gaps) numsbg.setSize({gaps + (charw/2), windowSize.y});
 
         editor.buttons[1].setText(cb_text);
         editor.buttons[2].setText(to_string((int)editor.lines.size()));
-        
+
         first_visible = static_cast<size_t>(max(0.f, editor.offsetY / line_height));
         last_visible  = min(
             editor.lines.size() - 1,
@@ -273,7 +273,7 @@ int main(int argc, char* argv[]) {
                     if (editor.cursorX < buflen(editor.cursorY, editor.lines))
                         editor.cursorX++;
                     else if (editor.cursorY != editor.lines.size()-1) {
-                        editor.cursorX=0; 
+                        editor.cursorX=0;
                         editor.cursorY++;
                     }
                 }
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                
+
                 // ========== Delete keys ==========
 
                 if (key->code == sf::Keyboard::Key::Backspace) {
@@ -423,13 +423,13 @@ int main(int argc, char* argv[]) {
             /* ? MOUSE SCROLL PART ¿ */
 
             if (const auto* mouse = event->getIf<sf::Event::MouseWheelScrolled>()) {
-    
-                bool shift_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || 
+
+                bool shift_pressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) ||
                                      sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift);
-                
-                bool ctrl_pressed  = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) || 
+
+                bool ctrl_pressed  = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) ||
                                      sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
-                
+
                 int mod = 1;
                 if (ctrl_pressed) mod = 2;
 
@@ -442,7 +442,7 @@ int main(int argc, char* argv[]) {
                             if((int)line.size()>max_line_length)max_line_length=line.size();
                         }
                         float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
-                        
+
                         if (editor.offsetX < 0) editor.offsetX = 0;
                         if (editor.offsetX > max_scroll) editor.offsetX = max_scroll;
 
@@ -453,7 +453,7 @@ int main(int argc, char* argv[]) {
                         if (editor.offsetY < 0) editor.offsetY = 0;
                         if (editor.offsetY > max_scroll) editor.offsetY = max_scroll;
                     }
-                } 
+                }
                 // Horizontal touchpad
                 else if (mouse->wheel == sf::Mouse::Wheel::Horizontal) {
                     editor.offsetX -= (int)(mouse->delta * charw * 5 * mod);
@@ -461,7 +461,7 @@ int main(int argc, char* argv[]) {
                     int max_line_length = 0;
                     for(const auto&line:editor.lines)if((int)line.size()>max_line_length)max_line_length=line.size();
                     float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
-                        
+
                     if (editor.offsetX < 0) editor.offsetX = 0;
                     if (editor.offsetX > max_scroll) editor.offsetX = max_scroll;
                 }
@@ -483,10 +483,10 @@ int main(int argc, char* argv[]) {
             text.setFillColor(HL(editor.lines[i], editor.save_filename, theme_color1));
             text.setString(editor.lines[i]);
             text.setPosition({text_x + gaps - editor.offsetX, text_y + i * line_height - editor.offsetY});
-            
+
             window.draw(text);
         }
-        
+
         window.draw(numsbg);
 
         for (size_t i = first_visible; i <= last_visible; i++) {
@@ -497,9 +497,9 @@ int main(int argc, char* argv[]) {
 
             window.draw(strnums);
         }
-        
+
         if (tick < fps/2) window.draw(cursor);
-        else if (tick > fps-1) tick = 0;        
+        else if (tick > fps-1) tick = 0;
 
         for (auto& b : editor.buttons) window.draw(b);
 
