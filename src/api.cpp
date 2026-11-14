@@ -2,7 +2,7 @@ extern "C" {
     #include <wren.h>
 }
 #include <iostream>
-#include "inc/helper.hpp"
+// #include "inc/helper.hpp"
 
 void writeFn(WrenVM* /* vm */, const char* text) {std::cout << text;}
 
@@ -19,5 +19,26 @@ void errorFn(
         std::cerr << "[WREN TRACE] " << module << ":" << line << " - " << msg << "\n";
     }
 }
+/*
+static void getcursorstr(WrenVM* vm) {
+    Editor* e = static_cast<Editor*>(wrenGetSlotForeign(vm, 0));
+    if (!e) {wrenSetSlotString(vm, 0, ""); return;}
 
-std::string getcursorstr(WrenVM* /* wm */, Editor e) {return e.lines[e.cursorY];}
+    if (e->cursorY >= e->lines.size()) {
+        wrenSetSlotString(vm, 0, "");
+        return;
+    }
+
+    const std::string& s = e->lines[e->cursorY];
+
+    wrenSetSlotString(vm, 0, s.c_str());
+}
+
+static WrenForeignMethodFn bindEditorMethods(
+    WrenVM* vm, const char*  module, const char* className,
+    bool isStatic, const char* signature)
+{
+    if (std::string(className) == "Editor" && std::string(signature) == "cursorstr()") return getcursorstr;
+    return nullptr;
+}
+*/
