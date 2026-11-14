@@ -22,6 +22,7 @@ void help_msg() {
     cout << "| Ctrl+C        -  copying string under cursor       |\n";
     cout << "| Ctrl+Shift+C  -  copying ALL file to clipbaord     |\n";
     cout << "| Ctrl+V        -  paste text from your clipboard    |\n";
+    cout << "| Ctrl+D        -  copy string under cursor to next  |\n";
     cout << "|                                                    |\n";
     cout << "| Ctrl+U        -  moving cursor to center of screen |\n";
     cout << "+---------------------- flags -----------------------+\n";

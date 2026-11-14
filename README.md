@@ -45,18 +45,23 @@ cmake --build build
 
 ## Hotkeys
 
-- Ctrl+S and Ctrl+Shift+S : classical saving file
-- Ctrl+U : moving cursor to center of screen
-- Ctrl+Scroll : scrolling 2x faster
-- Ctrl+C and Ctrl+Shift+C : Copying string under cursor **or** all file to clipboard
-- Ctrl+V : pasting text from clipboard
+|    Hotkey    |                    Doing                   |
+|:-------------|:------------------------------------------:|
+| Ctrl+Scroll  | scrolling 2x faster                        |
+| Ctrl+S       | saving file                                |
+| Ctrl+Shift+S | choosing a dir to save file                |
+| Ctrl+U       | moving cursor to center of screen          |
+| Ctrl+C       | Copying string under cursor                |
+| Ctrl+Shift+C | Copying all file to clipboard              |
+| Ctrl+V       | pasting text from clipboard                |
+| Ctrl+D       | copying string under cursor to next string |
 
 ## Flags
 
 You can use some flags.
 - `--help` or `-h`: for reference
 - `--debug` or `-d`: for debug msgs in shell
-- `--version` or `-v`: shows version of 
+- `--version` or `-v`: shows version of
 
 ## Configuration
 
@@ -130,10 +135,17 @@ Syntax highlight
 
 ## Milestones
 
-- [x] get 1000 lines with `find src -type f -name "*.cpp" -exec cat {} + | wc -l`
+### normal
+- [ ] split draw cycle to tokens
+- [ ] add themes
+
+### lines count
+> **You can check lines count with command** `find src -type f -name "*.cpp" -exec cat {} + | wc -l`
+
+- [x] get 1000 lines
+- [ ] get 1500 lines
 - [ ] get 2000 lines
 - [ ] get 5000 lines
-- [ ] split draw cycle to tokens
 
 ## Gallery
 

@@ -391,6 +391,15 @@ int main(int argc, char* argv[]) {
                     editor.lines[editor.cursorY].insert(editor.cursorX, clipboard);
                     editor.cursorX += clipboard.size();
                 }
+                if (key->code == sf::Keyboard::Key::D && key->control && !key->shift) { // Ctrl+D
+                    string being_copied = editor.lines[editor.cursorY];
+                    editor.lines.insert(editor.lines.begin()+static_cast<long>(editor.cursorY)+1, being_copied);
+
+                    editor.cursorY++;
+                    if (editor.cursorY > last_visible) editor.offsetY += line_height;
+                }
+
+
                 tick = 0;
             }
 
@@ -398,11 +407,13 @@ int main(int argc, char* argv[]) {
                 if (t->unicode >= 32 && t->unicode < 127) {
                     char typed = static_cast<char>(t->unicode);
 
-                    if      (typed == '('){editor.lines[editor.cursorY].insert(editor.cursorX, "()");}
-                    else if (typed == '['){editor.lines[editor.cursorY].insert(editor.cursorX, "[]");}
-                    else if (typed == '{'){editor.lines[editor.cursorY].insert(editor.cursorX, "{}");}
-                    else if (typed == '"'){editor.lines[editor.cursorY].insert(editor.cursorX, "\"\"");}
-                    else                  {editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed);}
+                    if      (typed == '(') {editor.lines[editor.cursorY].insert(editor.cursorX, "()");}
+                    else if (typed == '[') {editor.lines[editor.cursorY].insert(editor.cursorX, "[]");}
+                    else if (typed == '{') {editor.lines[editor.cursorY].insert(editor.cursorX, "{}");}
+                    else if (typed == '"') {editor.lines[editor.cursorY].insert(editor.cursorX, "\"\"");}
+                    else if (typed == '\''){editor.lines[editor.cursorY].insert(editor.cursorX, "\'\'");}
+                    else if (typed == '<') {editor.lines[editor.cursorY].insert(editor.cursorX, "<>");}
+                    else                   {editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed);}
                     editor.cursorX++;
 
                     tick = 0;
