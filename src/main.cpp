@@ -176,12 +176,13 @@ int main(int argc, char* argv[]) {
     sf::Text strnums(font, "",             font_size);
     sf::RectangleShape cursor({2.f, line_height});
     sf::RectangleShape numsbg({gaps + (charw*2), windowSize.y});
-
+    sf::RectangleShape current_line_bg({windowSize.x, line_height});
 
     text.setPosition({charw, 0.f});
     strnums.setPosition({charw, 0.f});
     numsbg.setPosition({0.f, 0.f});
 
+    current_line_bg.setFillColor(sf::Color(255, 255, 255, 15));
     text.setFillColor(theme_color1);
     strnums.setFillColor(theme_color1);
     cursor.setFillColor(theme_color1);
@@ -476,8 +477,14 @@ int main(int argc, char* argv[]) {
             text_y + editor.cursorY * line_height - editor.offsetY
         });
 
+        if (editor.cursorY >= first_visible && editor.cursorY <= last_visible) {
+            current_line_bg.setPosition({0.f, text_y + editor.cursorY * line_height - editor.offsetY});
+        }
+
         if (theme == "dark") window.clear(sf::Color(30, 30, 30));
         else window.clear(sf::Color(255, 239, 223));
+
+        window.draw(current_line_bg);
 
         for (size_t i = first_visible; i <= last_visible; i++) {
             text.setFillColor(HL(editor.lines[i], editor.save_filename, theme_color1));
