@@ -79,19 +79,16 @@ void update_visible(Editor& editor, float line_height, float window_height) {
     editor.last_visible = std::min(editor.lines.size() - 1, last);
 }
 
-void handle_arrows(
-    Editor& editor, sf::Keyboard::Key code, float line_height,
-    const sf::Event::KeyPressed* key, sf::Vector2f windowSize
-) {
+void handle_arrows(Editor& editor, sf::Keyboard::Key code, float line_height, sf::Vector2f windowSize) {
 
-    if (key->code==sf::Keyboard::Key::Left) {
+    if (code==sf::Keyboard::Key::Left) {
         if (editor.cursorX > 0) editor.cursorX--;
         else if (editor.cursorY > 0) {
             editor.cursorY--;
             editor.cursorX = buflen(editor.cursorY, editor.lines);
         }
     }
-    if (key->code==sf::Keyboard::Key::Right) {
+    if (code==sf::Keyboard::Key::Right) {
         if (editor.cursorX < buflen(editor.cursorY, editor.lines))
             editor.cursorX++;
         else if (editor.cursorY != editor.lines.size()-1) {
@@ -103,7 +100,7 @@ void handle_arrows(
     // ========== Up-Down keys ==========
     float max_scroll = std::max(0.f, editor.lines.size() * line_height - windowSize.y + 100.f);
 
-    if (key->code == sf::Keyboard::Key::Down && editor.cursorY < editor.lines.size()-1) {
+    if (code == sf::Keyboard::Key::Down && editor.cursorY < editor.lines.size()-1) {
         editor.cursorY++;
 
         if (editor.cursorY > editor.last_visible)  editor.offsetY += line_height;
@@ -113,7 +110,7 @@ void handle_arrows(
             editor.cursorX = buflen(editor.cursorY, editor.lines);
         }
     }
-    if (key->code==sf::Keyboard::Key::Up) {
+    if (code == sf::Keyboard::Key::Up) {
         if (editor.cursorY > 0) {
             editor.cursorY--;
 
@@ -128,8 +125,7 @@ void handle_arrows(
 }
 
 void handle_backspaces(
-    Editor& editor, sf::Keyboard::Key code, float line_height,
-    const sf::Event::KeyPressed* key,
+    Editor& editor, float line_height, const sf::Event::KeyPressed* key,
     sf::Vector2f windowSize, std::string placeholder, int w_height
 ) {
     float max_scroll = std::max(0.f, editor.lines.size() * line_height - windowSize.y + 100.f);
@@ -172,8 +168,8 @@ void handle_backspaces(
     }
 }
 
-void handle_tab(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key) {
-    if (key->code == sf::Keyboard::Key::Tab) {
+void handle_tab(Editor& editor, sf::Keyboard::Key code) {
+    if (code == sf::Keyboard::Key::Tab) {
         int spaces = 4 - (editor.cursorX % 4);
         for (int i = 0; i < spaces; i++) {
             editor.lines[editor.cursorY].insert(editor.cursorX, 1, ' ');
@@ -183,8 +179,8 @@ void handle_tab(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPres
 }
 
 
-void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key) {
-    if (key->code == sf::Keyboard::Key::Enter) {
+void handle_enter(Editor& editor, sf::Keyboard::Key code) {
+    if (code == sf::Keyboard::Key::Enter) {
         std::string rest = editor.lines[editor.cursorY].substr(editor.cursorX);
         editor.lines[editor.cursorY].erase(editor.cursorX);
 
@@ -199,7 +195,7 @@ void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPr
 
 
 void handle_hotkeys(
-    Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key, float line_height
+    Editor& editor, const sf::Event::KeyPressed* key, float line_height
 ) {
 
 

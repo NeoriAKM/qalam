@@ -64,21 +64,18 @@ void update_visible(Editor& editor, float line_height, float window_height);
 
 ////////////////// Input handles //////////////////
 
-void handle_arrows(
-    Editor& editor, sf::Keyboard::Key code, float line_height,
-    float window_height, const sf::Event::KeyPressed* key, sf::Vector2f windowSize
-);
+void handle_arrows(Editor& editor, sf::Keyboard::Key code, float line_height, sf::Vector2f windowSize);
 
 void handle_backspaces(
-    Editor& editor, sf::Keyboard::Key code, float line_height,
+    Editor& editor, float line_height,
     const sf::Event::KeyPressed* key, sf::Vector2f windowSize,
     std::string placeholder, int w_height
 );
 
-void handle_tab(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
+void handle_tab(Editor& editor, sf::Keyboard::Key code);
 
-void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
+void handle_enter(Editor& editor, sf::Keyboard::Key code);
 
 void handle_hotkeys(
-    Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key, float line_height
+    Editor& editor, const sf::Event::KeyPressed* key, float line_height
 );

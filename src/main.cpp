@@ -256,12 +256,12 @@ int main(int argc, char* argv[]) {
 
 
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                handle_arrows(editor, key->code, line_height, w_height, key, windowSize);
-                handle_backspaces(editor, key->code, line_height, key, windowSize, placeholder, w_height);
-                handle_tab(editor, key->code, key);
-                handle_enter(editor, key->code, key);
+                handle_arrows(editor, key->code, line_height, windowSize);
+                handle_backspaces(editor, line_height, key, windowSize, placeholder, w_height);
+                handle_tab(editor, key->code);
+                handle_enter(editor, key->code);
 
-                handle_hotkeys(editor, key->code, key, line_height);
+                handle_hotkeys(editor, key, line_height);
 
                 tick = 0;
             }
