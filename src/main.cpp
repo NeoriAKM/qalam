@@ -165,8 +165,6 @@ int main(int argc, char* argv[]) {
 
     unsigned int tick = 0;
 
-    size_t first_visible; size_t last_visible;
-
     std::string cb_text = "";
 
     const float line_height = font.getLineSpacing(font_size);
@@ -196,7 +194,7 @@ int main(int argc, char* argv[]) {
         ),
         Button(font, "???",   // ! cursor pos button
             {20, windowSize.y-60}, {200, 40}, [&]() {
-            editor.cursorY = (last_visible + first_visible) / 2;
+            editor.cursorY = (editor.last_visible + editor.first_visible) / 2;
             editor.cursorX = buflen(editor.cursorY, editor.lines);
         }),
         Button(                        // ! string button
@@ -251,123 +249,22 @@ int main(int argc, char* argv[]) {
         editor.buttons[1].setText(cb_text);
         editor.buttons[2].setText(to_string((int)editor.lines.size()));
 
-        first_visible = static_cast<size_t>(max(0.f, editor.offsetY / line_height));
-        last_visible  = min(
-            editor.lines.size() - 1,
-            static_cast<size_t>(max(0.f, (editor.offsetY + windowSize.y) / line_height)) + 1
-        );
+        update_visible(editor, line_height, w_height);
 
         while (const optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) window.close();
 
-            // ========== Left Right keys ==========
 
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                if (key->code==sf::Keyboard::Key::Left) {
-                    if (editor.cursorX > 0) editor.cursorX--;
-                    else if (editor.cursorY > 0) {
-                        editor.cursorY--;
-                        editor.cursorX = buflen(editor.cursorY, editor.lines);
-                    }
-                }
-                if (key->code==sf::Keyboard::Key::Right) {
-                    if (editor.cursorX < buflen(editor.cursorY, editor.lines))
-                        editor.cursorX++;
-                    else if (editor.cursorY != editor.lines.size()-1) {
-                        editor.cursorX=0;
-                        editor.cursorY++;
-                    }
-                }
+                handle_arrows(editor, key->code, line_height, w_height, key, windowSize);
+                handle_backspaces(editor, key->code, line_height, key, windowSize, placeholder, w_height);
+                handle_tab(editor, key->code, key);
+                handle_enter(editor, key->code, key);
 
-                // ========== Up-Down keys ==========
-                float max_scroll = std::max(0.f, editor.lines.size() * line_height - windowSize.y + 100.f);
-
-                if (key->code == sf::Keyboard::Key::Down && editor.cursorY < editor.lines.size()-1) {
-                    editor.cursorY++;
-
-                    if (editor.cursorY > last_visible)  editor.offsetY += line_height;
-
-                    if (editor.offsetY > max_scroll) editor.offsetY = max_scroll;
-                    if (editor.cursorX > buflen(editor.cursorY, editor.lines)) {
-                        editor.cursorX = buflen(editor.cursorY, editor.lines);
-                    }
-                }
-                if (key->code==sf::Keyboard::Key::Up) {
-                    if (editor.cursorY > 0) {
-                        editor.cursorY--;
-
-                        if (editor.cursorY < first_visible) editor.offsetY -= line_height;
-
-                        if (editor.offsetY < 0) editor.offsetY = 0;
-                        if (editor.cursorX > buflen(editor.cursorY, editor.lines)) {
-                            editor.cursorX = buflen(editor.cursorY, editor.lines);
-                        }
-                    }
-                }
-
-                // ========== Delete keys ==========
-
-                if (key->code == sf::Keyboard::Key::Backspace) {
-                    if (key->control) {
-                        while (editor.cursorX > 0 && editor.lines[editor.cursorY][editor.cursorX - 1] == ' ') editor.cursorX--;
-                        while (editor.cursorX > 0 && editor.lines[editor.cursorY][editor.cursorX - 1] != ' ') {
-                            editor.lines[editor.cursorY].erase(editor.cursorX - 1, 1);
-                            editor.cursorX--;
-                        }
-                        continue;
-                    }
-                    // simple backspace
-                    if (editor.lines[editor.cursorY] == placeholder) {editor.lines[editor.cursorY] = ""; editor.cursorX = 0;}
-                    if (editor.cursorX > 0) {
-                        editor.lines[editor.cursorY].erase(editor.cursorX - 1, 1);
-                        editor.cursorX--;
-                    } else if (editor.cursorY > 0) {
-                        size_t old_len = buflen(editor.cursorY - 1, editor.lines);
-                        editor.lines[editor.cursorY - 1] += editor.lines[editor.cursorY];
-                        editor.lines.erase(editor.lines.begin() + static_cast<ptrdiff_t>(editor.cursorY));
-                        editor.cursorY--;
-                        editor.cursorX = old_len;
-
-                        if (editor.cursorY >= editor.lines.size()) editor.cursorY = editor.lines.size() - 1;
-                        if (editor.cursorX > buflen(editor.cursorY, editor.lines))
-                            editor.cursorX = buflen(editor.cursorY, editor.lines);
-
-                        if (editor.offsetY > max_scroll) editor.offsetY = (int)max_scroll;
-                        if (editor.offsetY < 0) editor.offsetY = 0;
-
-                        first_visible = static_cast<size_t>(max(0, (int)(editor.offsetY / line_height)));
-                        last_visible  = min(
-                            editor.lines.size() - 1,
-                            static_cast<size_t>(max(0.f, (editor.offsetY + windowSize.y) / line_height)) + 1
-                        );
-                    }
-                }
-                if (key->code == sf::Keyboard::Key::Delete && editor.cursorX < buflen(editor.cursorY, editor.lines)) {
-                    editor.lines[editor.cursorY].erase(editor.cursorX, 1);
-                }
-
-                if (key->code == sf::Keyboard::Key::Tab) {
-                    int spaces = 4 - (editor.cursorX % 4);
-                    for (int i = 0; i < spaces; i++) {
-                        editor.lines[editor.cursorY].insert(editor.cursorX, 1, ' ');
-                        editor.cursorX++;
-                    }
-                }
-                if (key->code == sf::Keyboard::Key::Enter) {
-                    std::string rest = editor.lines[editor.cursorY].substr(editor.cursorX);
-                    editor.lines[editor.cursorY].erase(editor.cursorX);
-
-                    size_t indent = 0;
-                    while (indent < editor.lines[editor.cursorY].size() && editor.lines[editor.cursorY][indent] == ' ') indent++;
-
-                    editor.lines.insert(editor.lines.begin() + static_cast<std::ptrdiff_t>(editor.cursorY+1), (std::string(indent, ' ') + rest));
-                    editor.cursorY++;
-                    editor.cursorX = indent;
-                }
                 /////////// Ctrl+Something ///////////
                 // ! CURSOR ACTS
                 if (key->code == sf::Keyboard::Key::U && key->control && !key->shift) { // ctrl+U
-                    editor.cursorY = (last_visible + first_visible) / 2;
+                    editor.cursorY = (editor.last_visible + editor.first_visible) / 2;
                     editor.cursorX = buflen(editor.cursorY, editor.lines);
                 }
 
@@ -396,7 +293,7 @@ int main(int argc, char* argv[]) {
                     editor.lines.insert(editor.lines.begin()+static_cast<long>(editor.cursorY)+1, being_copied);
 
                     editor.cursorY++;
-                    if (editor.cursorY > last_visible) editor.offsetY += line_height;
+                    if (editor.cursorY > editor.last_visible) editor.offsetY += line_height;
                 }
 
 
@@ -488,7 +385,7 @@ int main(int argc, char* argv[]) {
             text_y + editor.cursorY * line_height - editor.offsetY
         });
 
-        if (editor.cursorY >= first_visible && editor.cursorY <= last_visible) {
+        if (editor.cursorY >= editor.first_visible && editor.cursorY <= editor.last_visible) {
             current_line_bg.setPosition({0.f, text_y + editor.cursorY * line_height - editor.offsetY});
         }
 
@@ -497,7 +394,7 @@ int main(int argc, char* argv[]) {
 
         window.draw(current_line_bg);
 
-        for (size_t i = first_visible; i <= last_visible; i++) {
+        for (size_t i = editor.first_visible; i <= editor.last_visible; i++) {
             text.setFillColor(HL(editor.lines[i], editor.save_filename, theme_color1));
             text.setString(editor.lines[i]);
             text.setPosition({text_x + gaps - editor.offsetX, text_y + i * line_height - editor.offsetY});
@@ -507,7 +404,7 @@ int main(int argc, char* argv[]) {
 
         window.draw(numsbg);
 
-        for (size_t i = first_visible; i <= last_visible; i++) {
+        for (size_t i = editor.first_visible; i <= editor.last_visible; i++) {
             strnums.setString(to_string(i+1));
             sf::FloatRect bounds = strnums.getLocalBounds();
             strnums.setOrigin({bounds.position.x + bounds.size.x + (charw * 1.5f), 0.f});
@@ -526,6 +423,6 @@ int main(int argc, char* argv[]) {
         old_gaps = gaps;
     }
     if (update_handle != nullptr) wrenReleaseHandle(vm, update_handle);
-    wrenFreeVM(vm);
+    if (vm) wrenFreeVM(vm);
     return 0;
 }

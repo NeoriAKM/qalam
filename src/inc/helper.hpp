@@ -33,6 +33,9 @@ struct Editor {
     float offsetY = 0;
     std::string save_filename;
 
+    size_t first_visible;
+    size_t last_visible;
+
     std::vector<Button> buttons;
 };
 
@@ -56,3 +59,22 @@ inline Args parse_args(int argc, char* argv[]) {
     }
     return args;
 }
+
+void update_visible(Editor& editor, float line_height, float window_height);
+
+////////////////// Input handles //////////////////
+
+void handle_arrows(
+    Editor& editor, sf::Keyboard::Key code, float line_height,
+    float window_height, const sf::Event::KeyPressed* key, sf::Vector2f windowSize
+);
+
+void handle_backspaces(
+    Editor& editor, sf::Keyboard::Key code, float line_height,
+    const sf::Event::KeyPressed* key, sf::Vector2f windowSize,
+    std::string placeholder, int w_height
+);
+
+void handle_tab(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
+
+void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
