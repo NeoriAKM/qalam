@@ -196,3 +196,44 @@ void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPr
         editor.cursorX = indent;
     }
 }
+
+
+void handle_hotkeys(
+    Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key, float line_height
+) {
+
+
+    // ! CURSOR ACTS
+    if (key->code == sf::Keyboard::Key::U && key->control && !key->shift) { // ctrl+U
+        editor.cursorY = (editor.last_visible + editor.first_visible) / 2;
+        editor.cursorX = buflen(editor.cursorY, editor.lines);
+    }
+
+    // ! SAVES
+    if (key->code == sf::Keyboard::Key::S && key->control && !key->shift) { // ctrl+S
+        save(editor.lines, editor.save_filename);
+    }
+    if (key->code == sf::Keyboard::Key::S && key->control && key->shift) {  // Ctrl+Shift+S
+        make_save_window(editor.save_filename, editor.lines);
+    }
+
+    // ! COPIES
+    if (key->code == sf::Keyboard::Key::C && key->control && !key->shift) {  // Ctrl+C
+        copy_string(editor.lines, editor.cursorY);
+    }
+    if (key->code == sf::Keyboard::Key::C && key->control && key->shift)  { // Ctrl+Shift+C
+        copy_vec(editor.lines);
+    }
+    if (key->code == sf::Keyboard::Key::V && key->control && !key->shift) { // Ctrl+V
+        const string clipboard = sf::Clipboard::getString().toAnsiString();
+        editor.lines[editor.cursorY].insert(editor.cursorX, clipboard);
+        editor.cursorX += clipboard.size();
+    }
+    if (key->code == sf::Keyboard::Key::D && key->control && !key->shift) { // Ctrl+D
+        string being_copied = editor.lines[editor.cursorY];
+        editor.lines.insert(editor.lines.begin()+static_cast<long>(editor.cursorY)+1, being_copied);
+
+        editor.cursorY++;
+        if (editor.cursorY > editor.last_visible) editor.offsetY += line_height;
+    }
+}

@@ -78,3 +78,7 @@ void handle_backspaces(
 void handle_tab(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
 
 void handle_enter(Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key);
+
+void handle_hotkeys(
+    Editor& editor, sf::Keyboard::Key code, const sf::Event::KeyPressed* key, float line_height
+);
