@@ -126,7 +126,7 @@ void handle_arrows(Editor& editor, sf::Keyboard::Key code, float line_height, sf
 
 void handle_backspaces(
     Editor& editor, float line_height, const sf::Event::KeyPressed* key,
-    sf::Vector2f windowSize, std::string placeholder, int w_height
+sf::Vector2f windowSize, std::string placeholder
 ) {
     float max_scroll = std::max(0.f, editor.lines.size() * line_height - windowSize.y + 100.f);
 
@@ -159,7 +159,7 @@ void handle_backspaces(
                 if (editor.offsetY > max_scroll) editor.offsetY = (int)max_scroll;
                 if (editor.offsetY < 0) editor.offsetY = 0;
 
-                update_visible(editor, line_height, w_height);
+                update_visible(editor, line_height, windowSize.y);
             }
         }
     }
@@ -194,9 +194,7 @@ void handle_enter(Editor& editor, sf::Keyboard::Key code) {
 }
 
 
-void handle_hotkeys(
-    Editor& editor, const sf::Event::KeyPressed* key, float line_height
-) {
+void handle_hotkeys(Editor& editor, const sf::Event::KeyPressed* key, float line_height) {
 
 
     // ! CURSOR ACTS

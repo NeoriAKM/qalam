@@ -257,10 +257,9 @@ int main(int argc, char* argv[]) {
 
             if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
                 handle_arrows(editor, key->code, line_height, windowSize);
-                handle_backspaces(editor, line_height, key, windowSize, placeholder, w_height);
+                handle_backspaces(editor, line_height, key, windowSize, placeholder);
                 handle_tab(editor, key->code);
                 handle_enter(editor, key->code);
-
                 handle_hotkeys(editor, key, line_height);
 
                 tick = 0;
@@ -270,13 +269,15 @@ int main(int argc, char* argv[]) {
                 if (t->unicode >= 32 && t->unicode < 127) {
                     char typed = static_cast<char>(t->unicode);
 
-                    if      (typed == '(') {editor.lines[editor.cursorY].insert(editor.cursorX, "()");}
-                    else if (typed == '[') {editor.lines[editor.cursorY].insert(editor.cursorX, "[]");}
-                    else if (typed == '{') {editor.lines[editor.cursorY].insert(editor.cursorX, "{}");}
-                    else if (typed == '"') {editor.lines[editor.cursorY].insert(editor.cursorX, "\"\"");}
-                    else if (typed == '\''){editor.lines[editor.cursorY].insert(editor.cursorX, "\'\'");}
-                    else if (typed == '<') {editor.lines[editor.cursorY].insert(editor.cursorX, "<>");}
-                    else                   {editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed);}
+                    switch (typed) {
+                        case '(': editor.lines[editor.cursorY].insert(editor.cursorX, "()");  break;
+                        case '[': editor.lines[editor.cursorY].insert(editor.cursorX, "[]");  break;
+                        case '{': editor.lines[editor.cursorY].insert(editor.cursorX, "{}");  break;
+                        case '"': editor.lines[editor.cursorY].insert(editor.cursorX, "\"\"");break;
+                        case '\'':editor.lines[editor.cursorY].insert(editor.cursorX, "''");  break;
+                        case '<': editor.lines[editor.cursorY].insert(editor.cursorX, "<>");  break;
+                        default: editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed); break;
+                    }
                     editor.cursorX++;
 
                     tick = 0;

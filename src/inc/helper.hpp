@@ -69,7 +69,7 @@ void handle_arrows(Editor& editor, sf::Keyboard::Key code, float line_height, sf
 void handle_backspaces(
     Editor& editor, float line_height,
     const sf::Event::KeyPressed* key, sf::Vector2f windowSize,
-    std::string placeholder, int w_height
+    std::string placeholder
 );
 
 void handle_tab(Editor& editor, sf::Keyboard::Key code);
