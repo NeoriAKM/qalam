@@ -1,5 +1,5 @@
 // ---------------------------- //
-// Qalam - Text editor v1.3.3   //
+// Qalam - Text editor v1.3.4   //
 // Copyright NeoriAKM(c)        //
 // ---------------------------- //
 
@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
     Args args = parse_args(argc, argv);
     Editor editor;
 
-    sf::Color theme_color1 = sf::Color::White; // fg
-    sf::Color theme_color2 = sf::Color::Black; // bg
+    sf::Color fg_color = sf::Color::White;
+    sf::Color bg_color = sf::Color::Black;
 
     /////////////// config //////////////////
 
@@ -50,7 +50,6 @@ int main(int argc, char* argv[]) {
 
     string font_path = config.font_path;
     unsigned int font_size = config.font_size;
-    string theme = config.theme;
     unsigned int fps = config.fps;
 
     int w_width = max(200, config.w_width);
@@ -63,7 +62,6 @@ int main(int argc, char* argv[]) {
         vector<pair<string,string>> cfg_base = {
             {"Font",        font_path},
             {"Size",        to_string(font_size)},
-            {"Theme",       theme},
             {"Window",      to_string(w_width) + "x" + to_string(w_height)},
             {"Placeholder", placeholder},
             {"Unnamed",     unnamed},
@@ -78,10 +76,9 @@ int main(int argc, char* argv[]) {
     }
 
 
-    if (theme == "light") {
-        theme_color1 = sf::Color(50, 50, 50);
-        theme_color2 = sf::Color::White;
-    }
+
+    fg_color = sf::Color(config.fg_c[0], config.fg_c[1], config.fg_c[1]);
+    bg_color = sf::Color(config.bg_c[0], config.bg_c[1], config.bg_c[1]);;
 
     ///////////////////////////////////////////////
 
@@ -181,9 +178,9 @@ int main(int argc, char* argv[]) {
     numsbg.setPosition({0.f, 0.f});
 
     current_line_bg.setFillColor(sf::Color(255, 255, 255, 15));
-    text.setFillColor(theme_color1);
-    strnums.setFillColor(theme_color1);
-    cursor.setFillColor(theme_color1);
+    text.setFillColor(fg_color);
+    strnums.setFillColor(fg_color);
+    cursor.setFillColor(fg_color);
     numsbg.setFillColor(sf::Color(40, 40, 40, 220));
 
     editor.buttons = {
@@ -276,7 +273,7 @@ int main(int argc, char* argv[]) {
                         case '"': editor.lines[editor.cursorY].insert(editor.cursorX, "\"\"");break;
                         case '\'':editor.lines[editor.cursorY].insert(editor.cursorX, "''");  break;
                         case '<': editor.lines[editor.cursorY].insert(editor.cursorX, "<>");  break;
-                        default: editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed); break;
+                        default: editor.lines[editor.cursorY].insert(editor.cursorX, 1, typed);
                     }
                     editor.cursorX++;
 
@@ -356,13 +353,12 @@ int main(int argc, char* argv[]) {
             current_line_bg.setPosition({0.f, text_y + editor.cursorY * line_height - editor.offsetY});
         }
 
-        if (theme == "dark") window.clear(sf::Color(30, 30, 30));
-        else window.clear(sf::Color(255, 239, 223));
+        window.clear(bg_color);
 
         window.draw(current_line_bg);
 
         for (size_t i = editor.first_visible; i <= editor.last_visible; i++) {
-            text.setFillColor(HL(editor.lines[i], editor.save_filename, theme_color1));
+            text.setFillColor(HL(editor.lines[i], editor.save_filename, fg_color));
             text.setString(editor.lines[i]);
             text.setPosition({text_x + gaps - editor.offsetX, text_y + i * line_height - editor.offsetY});
 

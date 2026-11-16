@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Last commit](https://img.shields.io/github/last-commit/NeoriAKM/qalam?color=red)
 
-# Qalam - Text editor (v1.3.3)
+# Qalam - Text editor (v1.3.4)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
@@ -94,6 +94,10 @@ Standart config:
 - `unnamed` - string-value. If you opening Qalam without specifying a file, you will open this file
 
 ## Last update
+
+### 1.3.4
+
+- Themes micro patch
 
 ### 1.3.3
 
