@@ -6,6 +6,8 @@
 #include <numeric>
 #include "inc/helper.hpp"
 
+const std::string VERSION = "1.3.4";
+
 using namespace std;
 
 void help_msg() {
@@ -37,6 +39,8 @@ void help_msg() {
 }
 
 void copyright_msg() {
+    cout << "+-----------------------------------+\n";
+    cout << "|           Qalam " << VERSION << "             |\n";
     cout << "+-----------------------------------+\n";
     cout << "|     Copyright © NeoriAKM (2026)   |\n";
     cout << "| All right reserved by MIT license |\n";

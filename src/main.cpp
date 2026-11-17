@@ -1,6 +1,6 @@
 // ---------------------------- //
 // Qalam - Text editor v1.3.4   //
-// Copyright NeoriAKM(c)        //
+// Copyright © NeoriAKM         //
 // ---------------------------- //
 
 #include <SFML/Window/Clipboard.hpp>
