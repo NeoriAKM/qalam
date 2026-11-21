@@ -75,10 +75,8 @@ int main(int argc, char* argv[]) {
         cout << repeat("-", 30);
     }
 
-
-
-    fg_color = sf::Color(config.fg_c[0], config.fg_c[1], config.fg_c[1]);
-    bg_color = sf::Color(config.bg_c[0], config.bg_c[1], config.bg_c[1]);;
+    fg_color = sf::Color(config.fg_c[0], config.fg_c[1], config.fg_c[2]);
+    bg_color = sf::Color(config.bg_c[0], config.bg_c[1], config.bg_c[2]);;
 
     ///////////////////////////////////////////////
 
@@ -216,6 +214,11 @@ int main(int argc, char* argv[]) {
         sf::Color(210, 210, 120, 200)
     );
 
+    int max_line_length = 0;
+    for(const auto& line : editor.lines) {
+        if((int)line.size()>max_line_length)max_line_length=line.size();
+    }
+
     /* ! //////////////////// MAINLOOP ///////////////////////// ! */
 
     while (window.isOpen()) {
@@ -278,6 +281,10 @@ int main(int argc, char* argv[]) {
                     editor.cursorX++;
 
                     tick = 0;
+
+                    for(const auto& line : editor.lines) {
+                        if((int)line.size()>max_line_length)max_line_length=line.size();
+                    }
                 }
             }
 
@@ -310,10 +317,6 @@ int main(int argc, char* argv[]) {
                     if (shift_pressed) {
                         editor.offsetX -= (int)(mouse->delta * charw * 5 * mod);
 
-                        int max_line_length = 0;
-                        for(const auto&line:editor.lines) {
-                            if((int)line.size()>max_line_length)max_line_length=line.size();
-                        }
                         float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
 
                         if (editor.offsetX < 0) editor.offsetX = 0;
@@ -331,8 +334,6 @@ int main(int argc, char* argv[]) {
                 else if (mouse->wheel == sf::Mouse::Wheel::Horizontal) {
                     editor.offsetX -= (int)(mouse->delta * charw * 5 * mod);
 
-                    int max_line_length = 0;
-                    for(const auto&line:editor.lines)if((int)line.size()>max_line_length)max_line_length=line.size();
                     float max_scroll = std::max(0.f, max_line_length * charw - windowSize.x + 100.f);
 
                     if (editor.offsetX < 0) editor.offsetX = 0;

@@ -111,7 +111,7 @@ Standard config:
 
 Mods are VERY simple. Mod need to be in `~/.config/mod1.wren` Have only 1 command - `System.print`. I don't realized it to end yet. Who can help me pliz
 
-## Last update
+## Last updates
 
 ### 1.3.4
 
@@ -120,6 +120,8 @@ Mods are VERY simple. Mod need to be in `~/.config/mod1.wren` Have only 1 comman
 - New values in JSON config
 
 - themes officially removed, and replaced by manual redacting decimal RGB color in config
+
+- Optimisation for mouse scrolling
 
 ### 1.3.3
 
