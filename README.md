@@ -3,11 +3,11 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Last commit](https://img.shields.io/github/last-commit/NeoriAKM/qalam?color=red)
 
-# Qalam - Text editor (v1.3.4)
+# Qalam - Text editor (Beta v1.4)
 
 My first C++ project. A lightweight text editor written in C++ using SFML.
 
-As of today, it contains **1.1K** lines of code.
+As of today, it contains **1.1K** lines of C++ code (and 171 H++ code).
 
 The name comes from the Arabic word **قلم** (qalam), meaning "*pen*".
 
@@ -112,6 +112,12 @@ Standard config:
 Mods are VERY simple. Mod need to be in `~/.config/mod1.wren` Have only 1 command - `System.print`. I don't realized it to end yet. Who can help me pliz
 
 ## Last updates
+
+### Beta 1.4
+
+**Syntax H: advanced**
+
+- Nothing
 
 ### 1.3.4
 

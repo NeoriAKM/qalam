@@ -19,7 +19,6 @@ extern "C" {
 #include <cstring>
 #include <string>
 #include <algorithm>
-// #include <optional>
 
 #include "inc/dialogues.hpp"
 #include "inc/config.hpp"
@@ -28,6 +27,16 @@ extern "C" {
 #include "inc/api.hpp"
 
 using namespace std;
+
+struct StyledSpan {
+    size_t start;
+    size_t length;
+    sf::Color color;
+};
+
+std::vector<StyledSpan> build_spans(const string& line, const string& filename, sf::Color default_color) {
+    return {{ 0, line.size(), HL(line, filename, default_color)}};
+}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////// MAIN DEFINITON //////////////////////////
@@ -359,11 +368,18 @@ int main(int argc, char* argv[]) {
         window.draw(current_line_bg);
 
         for (size_t i = editor.first_visible; i <= editor.last_visible; i++) {
-            text.setFillColor(HL(editor.lines[i], editor.save_filename, fg_color));
-            text.setString(editor.lines[i]);
-            text.setPosition({text_x + gaps - editor.offsetX, text_y + i * line_height - editor.offsetY});
+            auto spans = build_spans(editor.lines[i], editor.save_filename, fg_color);
 
-            window.draw(text);
+            float baseX = text_x + gaps - editor.offsetX;
+            float baseY = text_y + i * line_height - editor.offsetY;
+
+            for (const auto& s : spans) {
+                text.setString(editor.lines[i].substr(s.start, s.length));
+                text.setFillColor(s.color);
+                text.setPosition({ baseX + s.start * charw, baseY });
+                window.draw(text);
+            }
+
         }
 
         window.draw(numsbg);

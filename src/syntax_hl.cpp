@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cctype>
 
+#include "inc/syntax_hl.hpp"
+
 #include <SFML/Graphics/Color.hpp>
 
 bool here(const std::string& str, const std::string& val) {
@@ -152,7 +154,7 @@ sf::Color cmd_asm(std::string line, std::string filename, sf::Color non) {
         "push",  "pop",  "inc",  "dec",
         "section","jmp", "je",   "jne",
         "jc",    "jnc",  "jz",  "jnz",
-        "call", 
+        "call",
     };
 
     static const std::vector<std::string> AL = {
@@ -175,7 +177,7 @@ sf::Color cmd_asm(std::string line, std::string filename, sf::Color non) {
 
     if (here(spec, mnemonic))           return sf::Color(100, 200, 200);
     if (here(other, mnemonic))          return sf::Color(50, 255, 50);
-    if (here(AL, mnemonic))              return sf::Color(200, 0, 255);
+    if (here(AL, mnemonic))             return sf::Color(200, 0, 255);
 
     return non;
 }
